@@ -1,14 +1,12 @@
 from srcs.render.main_page import render_main_page
 from srcs.render.render_init import render
 
-
 def render_game(current_render : render):
-    img = render_main_page(current_render)
-    return img
+    render_main_page(current_render)
 
 def lanch_game():
     current_render = render()
-    img = render_game(current_render)
+    render_game(current_render)
     current_render.canvas.addtag_all("all")
     current_render.window.mainloop()
 

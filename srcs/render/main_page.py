@@ -1,15 +1,9 @@
-from tkinter import BOTH, YES, Button, PhotoImage, Frame
+from tkinter import Button, PhotoImage
 from srcs.render.render_init import render
+from srcs.render.game_page import render_game_page
 
-def backgroud(current_render : render):
-    image_image_1 = PhotoImage(
-        file=current_render.get_image("main_page", "backgroud"))
-    current_render.canvas.create_image(
-        300.0,
-        250.0,
-        image=image_image_1
-    )
 
+def game_Title(current_render : render):
     current_render.canvas.create_text(
         47.0,
         38.0,
@@ -18,12 +12,12 @@ def backgroud(current_render : render):
         fill="#2E00FF",
         font=("IndieFlower Regular", 80 * -1)
     )
-    return image_image_1
 
 def setting_button(current_render : render):
     button_image_1 = PhotoImage(
         file=current_render.get_image("main_page", "button_setting"))
     button_1 = Button(
+        current_render.window,
         image=button_image_1,
         borderwidth=0,
         highlightthickness=0,
@@ -56,10 +50,11 @@ def player_AI_button(current_render : render):
     button_image_2 = PhotoImage(
         file=current_render.get_image("main_page", "button_player_AI"))
     button_2 = Button(
+        current_render.window,
         image=button_image_2,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: print("player vs AI button clicked"),
+        command=lambda: render_game_page(current_render, "AI"),
         relief="flat"
     )
     button_2.place(
@@ -88,10 +83,11 @@ def player_player_button(current_render : render):
     button_image_3 = PhotoImage(
         file=current_render.get_image("main_page", "button_player_player"))
     button_3 = Button(
+        current_render.window,
         image=button_image_3,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: print("player vs player button clicked"),
+        command=lambda: render_game_page(current_render, "players"),
         relief="flat"
     )
     button_3.place(
@@ -117,12 +113,11 @@ def player_player_button(current_render : render):
     button_3.bind('<Leave>', button_3_leave)
 
 def render_main_page(current_render : render):
-    main_page_frame = Frame(current_render.window)
-    main_page_frame.pack(fill=BOTH, expand=YES)
-    current_render.set_canvas(main_page_frame)
+    current_render.clear_window()
+    current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
-    backgroud_image = backgroud(current_render)
+    current_render.set_backgroud()
+    game_Title(current_render)
     setting_button(current_render)
     player_AI_button(current_render)
     player_player_button(current_render)
-    return backgroud_image
