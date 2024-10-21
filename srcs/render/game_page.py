@@ -1,6 +1,7 @@
 from tkinter import Button, PhotoImage, Frame, Label, Canvas
 from srcs.render.render_init import render
 
+TABLE_MARGE = 14
 
 def create_text_players(current_render : render, mode):
     player1 = "Player 1" if mode == "players" else "Player"
@@ -24,12 +25,20 @@ def create_text_players(current_render : render, mode):
     )
 
 def board_click(event):
+    canvas = event.widget
+    
+    # Get the width and height of the Canvas
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    cell_width = (canvas_width - (TABLE_MARGE * 2)) / 20
+    cell_height = (canvas_height - (TABLE_MARGE * 2)) / 20
     x, y = event.x, event.y
+    print(cell_height, cell_width)
     print(f"Clicked at: (x={x}, y={y})")
 
 def create_grid(canvas : Canvas, width, height, rows, cols):
-    x = 14
-    y = 14
+    x = TABLE_MARGE
+    y = TABLE_MARGE
     width = width - (x * 2)
     height = height - (y * 2)
     cell_width = width / cols
