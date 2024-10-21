@@ -28,7 +28,6 @@ def board_click(event):
     print(f"Clicked at: (x={x}, y={y})")
 
 def create_grid(canvas : Canvas, width, height, rows, cols):
-    # Calculate the size of each cell in the grid
     x = 14
     y = 14
     width = width - (x * 2)
@@ -36,7 +35,6 @@ def create_grid(canvas : Canvas, width, height, rows, cols):
     cell_width = width / cols
     cell_height = height / rows
 
-    # Create the grid by drawing vertical and horizontal lines
     for i in range(rows + 1):
         canvas.create_line(x, y + i * cell_height, x + width, y + i * cell_height, fill="black")
     for j in range(cols + 1):
@@ -46,33 +44,23 @@ def board_game(current_render : render):
     kwargs = dict(x=125.0, y=75.0, width=350.0, height=350.0)
 
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
-    # Create a frame for the board game
     frame = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
     frame.pack()
     frame.place(**kwargs)
 
-    # Create a canvas for drawing the grid
     canvas = Canvas(frame, width=kwargs['width'], height=kwargs['height'], bg='white', highlightthickness=0)
-    canvas.place(x=0, y=0)  # Place the canvas at the top left of the frame
+    canvas.place(x=0, y=0)
 
-    # Create a label for the background image
     canvas.create_image(
             kwargs["width"] / 2,
             kwargs["height"] / 2,
             image=board_game_img)
 
-    # Create a canvas for drawing the grid
-    # canvas = Canvas(frame, width=kwargs['width'], height=kwargs['height'], bg='white', highlightthickness=0)
-    # canvas.place(x=0, y=0)  # Place the canvas at the top left of the frame
-
-    # Create the grid on the canvas
     create_grid(canvas, rows=20, cols=20, width=kwargs["width"], height=kwargs["height"])
 
-    # Bind the click event to the frame
     canvas.bind("<Button-1>", board_click)
     
     current_render.save.append(board_game_img)
-    # current_render.save.append(frame)
 
 def back_button(current_render : render):
     from srcs.render.main_page import render_main_page
