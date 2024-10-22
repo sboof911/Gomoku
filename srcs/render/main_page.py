@@ -5,12 +5,12 @@ from srcs.render.game_page import render_game_page
 
 def game_Title(current_render : render):
     current_render.canvas.create_text(
-        47.0,
+        125.0,
         38.0,
         anchor="nw",
-        text="Gomoku Game",
+        text="Gomoku",
         fill="#2E00FF",
-        font=("IndieFlower Regular", 80 * -1)
+        font=("Segoe Script", 70 * -1)
     )
 
 def setting_button(current_render : render):

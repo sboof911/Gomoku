@@ -36,6 +36,16 @@ def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
     # Draw the black disk
     canvas.create_oval(x0, y0, x1, y1, fill=color)
 
+def draw_winning_line(canvas, pos, cell_width, cell_height, color):
+    canvas.create_line(
+        TABLE_MARGE + pos["x0"] * cell_width,
+        TABLE_MARGE + pos["y0"] * cell_height,
+        TABLE_MARGE + pos["x1"] * cell_width,
+        TABLE_MARGE + pos["y1"] * cell_height,
+        fill=color,
+        width=2
+        )
+
 def board_click(event, game_manager : game_manager_module):
     canvas = event.widget
     
@@ -49,16 +59,27 @@ def board_click(event, game_manager : game_manager_module):
     # Calculate the nearest grid lines (intersections)
     nearest_col = round((x - TABLE_MARGE) / cell_width)
     nearest_row = round((y - TABLE_MARGE) / cell_height)
-    
+
     # Calculate the exact intersection coordinates
     intersection_x = TABLE_MARGE + nearest_col * cell_width
     intersection_y = TABLE_MARGE + nearest_row * cell_height
-    
+
     # Check if the click is within ±2 pixels of the intersection
     if abs(x - intersection_x) <= MARGE_ERROR_THRESHOLD and abs(y - intersection_y) <= MARGE_ERROR_THRESHOLD:
-        if game_manager.set_move(nearest_col - 1, nearest_row - 1):
+        if game_manager.set_move(nearest_col, nearest_row):
             color = "black" if game_manager.player_turn != 1 else "white"
             draw_circle(canvas, intersection_x, intersection_y, color)
+            if game_manager.status != game_manager._game_status.PLAYING:
+                color = "black" if game_manager.status != 1 else "white"
+                draw_winning_line(canvas,
+                    game_manager._player._winner_pos,
+                    cell_width,
+                    cell_height,
+                    color)
+                print("black win" if game_manager.status == 1 else "white win")
+                return True
+
+    return False
 
 
 def create_grid(canvas : Canvas, width, height, rows, cols):
@@ -76,7 +97,12 @@ def create_grid(canvas : Canvas, width, height, rows, cols):
 
 def board_game(current_render : render, game_manager : game_manager_module):
     def clicked(event):
-        board_click(event, game_manager)
+        if board_click(event, game_manager):
+            from srcs.render.main_page import render_main_page
+            print("Sleeping second before going back to main_menu!")
+            current_render.window.after(10000, lambda: render_main_page(current_render))
+            print("Back To main_menu") # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
+
     kwargs = dict(x=125.0, y=75.0, width=350.0, height=350.0)
 
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
