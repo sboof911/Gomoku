@@ -1,72 +1,79 @@
 import numpy as np
-
-def _set_pos(x0, y0, x1, y1):
-    return dict(
-        x0=x0,
-        y0=y0,
-        x1=x1,
-        y1=y1
-    )
+from srcs.backend.game.player import player
 
 class board:
-    def __init__(self) -> None:
-        self._board = np.zeros((19, 19), dtype=int)
+    def __init__(self, board_size=19) -> None:
+        self._size = board_size
+        self._board = np.zeros((board_size, board_size), dtype=int)
+        self._board_winner_color = None
+        self._line_pos = None
 
+    def unset_stone(self, x, y):
+        self._board[y][x] = 0
 
-    def set_move(self, x, y, player_num):
-        if x > 19 or x < 0 or y > 19 or y < 0:
+    def place_stone(self, x, y, stone_color):
+        if x > self._size or x < 0 or y > self._size or y < 0:
             return False
 
         if self._board[y][x] == 0:
-            self._board[y][x] = player_num
+            self._board[y][x] = stone_color
             return True
 
         return False
 
-    def check_horizontal(self, i, j):
-        if np.all(self._board[i, j:j+5] == 1):
-            return 1, _set_pos(j+1, i+1, j+5, i+1)
-        elif np.all(self._board[i, j:j+5] == 2):
-            return 2, _set_pos(j+1, i+1, j+5, i+1)
+    def _set_winner_line_pos(self, x0, y0, x1, y1):
+        self._line_pos = dict(
+            x0=x0,
+            y0=y0,
+            x1=x1,
+            y1=y1
+        )
 
-        return 0, None
+    def check_horizontal(self, i, j, stone_color):
+        if np.all(self._board[i, j:j+5] == stone_color):
+            self._set_winner_line_pos(j+1, i+1, j+5, i+1)
+            self._board_winner_color =  stone_color
+            return True
 
-    def check_vertical(self, i, j):
-        if np.all(self._board[j:j+5, i] == 1):
-            return 1, _set_pos(i+1, j+1, i+1, j+5)
-        elif np.all(self._board[j:j+5, i] == 2):
-            return 2, _set_pos(i+1, j+1, i+1, j+5)
+        return False
 
-        return 0, None
+    def check_vertical(self, i, j, stone_color):
+        if np.all(self._board[j:j+5, i] == stone_color):
+            self._set_winner_line_pos(i+1, j+1, i+1, j+5)
+            self._board_winner_color =  stone_color
+            return True
 
-    def check_diag(self, i, j):
+        return False
+
+    def check_diag(self, i, j, stone_color):
         if i < 15:
-            if np.all(np.diagonal(self._board[i:i+5, j:j+5]) == 1):
-                return 1, _set_pos(j+1, i+1, j+5, i+5)
-            elif np.all(np.diagonal(self._board[i:i+5, j:j+5]) == 2):
-                return 2, _set_pos(j+1, i+1, j+5, i+5)
+            if np.all(np.diagonal(self._board[i:i+5, j:j+5]) == stone_color):
+                self._set_winner_line_pos(j+1, i+1, j+5, i+5)
+                self._board_winner_color =  stone_color
+                return True
 
-            if np.all(np.diagonal(np.fliplr(self._board[i:i+5, j:j+5])) == 1):
-                return 1, _set_pos(j+5, i+1, j+1, i+5)
-            elif np.all(np.diagonal(np.fliplr(self._board[i:i+5, j:j+5])) == 2):
-                return 2, _set_pos(j+5, i+1, j+1, i+5)
+            if np.all(np.diagonal(np.fliplr(self._board[i:i+5, j:j+5])) == stone_color):
+                self._set_winner_line_pos(j+5, i+1, j+1, i+5)
+                self._board_winner_color =  stone_color
+                return True
 
-        return 0, None
+        return 0
 
-    def check_winner(self):
-        for i in range(19):
-            for j in range(15):
-                winner, pos = self.check_horizontal(i, j)
-                if winner > 0:
-                    return winner, pos
-                winner, pos = self.check_vertical(i, j)
-                if winner > 0:
-                    return winner, pos
-                winner, pos = self.check_diag(i, j)
-                if winner > 0:
-                    return winner, pos
+    def terminal_state(self):
+        for i in range(self._size):
+            for j in range(self._size - 4):
+                for stone_color in [player.BLACK, player.WHITE]:
+                    if self.check_horizontal(i, j, stone_color):
+                        return True
+                    if self.check_vertical(i, j, stone_color):
+                        return True
+                    if self.check_diag(i, j, stone_color):
+                        return True
 
-        # Check if self._board is full (no 0s)
         if not np.any(self._board == 0):
-            return 0, None  # No winner, and board is full
-        return -1, None
+            self._board_winner_color = player.DRAW
+            return True
+        return False
+    
+    def __getitem__(self, index):
+        return self._board[index]
