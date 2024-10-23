@@ -3,8 +3,8 @@ from srcs.render.render_init import render
 from srcs.backend.game.game_manager import game_manager as game_manager_module
 import random
 
-TABLE_MARGE = 14
-MARGE_ERROR_THRESHOLD = 3
+TABLE_MARGE = render.TABLE_MARGE
+MARGE_ERROR_THRESHOLD = render.MARGE_ERROR_THRESHOLD
 
 def create_text_players(current_render : render, player1_name, player2_name):
     current_render.canvas.create_text(

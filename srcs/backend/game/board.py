@@ -2,7 +2,8 @@ import numpy as np
 from srcs.backend.game.player import player
 
 class board:
-    def __init__(self, board_size) -> None:
+    def __init__(self, board_size, connect_num) -> None:
+        self._connect_num = connect_num
         self._size = board_size
         self._board = np.full((board_size, board_size), player.ZERO, dtype=int)
         self._board_winner_color = None
@@ -30,15 +31,16 @@ class board:
         )
 
     def check_horizontal(self, i, j, stone_color):
-        if np.all(self._board[i, j:j+5] == stone_color):
-            line_pos = self._get_line_pos(j+1, i+1, j+5, i+1)
+        if np.all(self._board[i, j:j+self._connect_num] == stone_color):
+            line_pos = self._get_line_pos(j+1, i+1, j+self._connect_num, i+1)
             return True, line_pos
 
         return False, None
 
     def check_vertical(self, i, j, stone_color):
-        if np.all(self._board[j:j+5, i] == stone_color):
-            line_pos = self._get_line_pos(i+1, j+1, i+1, j+5)
+        if np.all(self._board[j:j+self._connect_num, i] == stone_color):
+            print("in")
+            line_pos = self._get_line_pos(i+1, j+1, i+1, j+self._connect_num)
             return True, line_pos
 
         return False, None
@@ -46,20 +48,20 @@ class board:
         # return False
 
     def check_diag(self, i, j, stone_color):
-        if i < 15:
-            if np.all(np.diagonal(self._board[i:i+5, j:j+5]) == stone_color):
-                line_pos = self._get_line_pos(j+1, i+1, j+5, i+5)
+        if i < self._size - (self._connect_num - 1):
+            if np.all(np.diagonal(self._board[i:i+self._connect_num, j:j+self._connect_num]) == stone_color):
+                line_pos = self._get_line_pos(j+1, i+1, j+self._connect_num, i+self._connect_num)
                 return True, line_pos
 
-            if np.all(np.diagonal(np.fliplr(self._board[i:i+5, j:j+5])) == stone_color):
-                line_pos = self._get_line_pos(j+5, i+1, j+1, i+5)
+            if np.all(np.diagonal(np.fliplr(self._board[i:i+self._connect_num, j:j+self._connect_num])) == stone_color):
+                line_pos = self._get_line_pos(j+self._connect_num, i+1, j+1, i+self._connect_num)
                 return True, line_pos
 
         return False, None
 
     def terminal_state(self, set_winner = True):
         for i in range(self._size):
-            for j in range(self._size - 4):
+            for j in range(self._size - (self._connect_num - 1)):
                 for stone_color in [player.BLACK, player.WHITE]:
                     def check(line_pos):
                         if set_winner:
