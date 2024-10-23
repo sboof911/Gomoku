@@ -124,7 +124,8 @@ def board_game(current_render : render, game_manager : game_manager_module):
             kwargs["height"] / 2,
             image=board_game_img)
 
-    cell_width, cell_height = create_grid(canvas, rows=20, cols=20, width=kwargs["width"], height=kwargs["height"])
+    cols, rows = game_manager.board.shape
+    cell_width, cell_height = create_grid(canvas, rows=rows+1, cols=cols+1, width=kwargs["width"], height=kwargs["height"])
 
     def clicked(event):
         if board_click(event, game_manager, cell_width, cell_height):

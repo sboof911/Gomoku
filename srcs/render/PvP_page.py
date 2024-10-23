@@ -113,7 +113,8 @@ def board_game(current_render : render, game_manager : game_manager_module):
             kwargs["height"] / 2,
             image=board_game_img)
 
-    create_grid(canvas, rows=20, cols=20, width=kwargs["width"], height=kwargs["height"])
+    cols, rows = game_manager.board.shape
+    create_grid(canvas, rows=rows+1, cols=cols+1, width=kwargs["width"], height=kwargs["height"])
 
     canvas.bind("<Button-1>", clicked)
 
