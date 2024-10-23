@@ -30,57 +30,54 @@ class board:
             y1=y1
         )
 
-    def check_horizontal(self, i, j, stone_color):
-        if np.all(self._board[i, j:j+self._connect_num] == stone_color):
+    def check_horizontal(self, board_array, i, j, stone_color):
+        if np.all(board_array[i, j:j+self._connect_num] == stone_color):
             line_pos = self._get_line_pos(j+1, i+1, j+self._connect_num, i+1)
             return True, line_pos
 
         return False, None
 
-    def check_vertical(self, i, j, stone_color):
-        if np.all(self._board[j:j+self._connect_num, i] == stone_color):
-            print("in")
+    def check_vertical(self, board_array, i, j, stone_color):
+        if np.all(board_array[j:j+self._connect_num, i] == stone_color):
             line_pos = self._get_line_pos(i+1, j+1, i+1, j+self._connect_num)
             return True, line_pos
 
         return False, None
 
-        # return False
-
-    def check_diag(self, i, j, stone_color):
+    def check_diag(self, board_array, i, j, stone_color):
         if i < self._size - (self._connect_num - 1):
-            if np.all(np.diagonal(self._board[i:i+self._connect_num, j:j+self._connect_num]) == stone_color):
+            if np.all(np.diagonal(board_array[i:i+self._connect_num, j:j+self._connect_num]) == stone_color):
                 line_pos = self._get_line_pos(j+1, i+1, j+self._connect_num, i+self._connect_num)
                 return True, line_pos
 
-            if np.all(np.diagonal(np.fliplr(self._board[i:i+self._connect_num, j:j+self._connect_num])) == stone_color):
+            if np.all(np.diagonal(np.fliplr(board_array[i:i+self._connect_num, j:j+self._connect_num])) == stone_color):
                 line_pos = self._get_line_pos(j+self._connect_num, i+1, j+1, i+self._connect_num)
                 return True, line_pos
 
         return False, None
 
-    def terminal_state(self, set_winner = True):
+    def terminal_state(self, stone_color, set_winner = True, board_array = None):
+        board_array = self._board if board_array is None else board_array
         for i in range(self._size):
             for j in range(self._size - (self._connect_num - 1)):
-                for stone_color in [player.BLACK, player.WHITE]:
-                    def check(line_pos):
-                        if set_winner:
-                            self._line_pos = line_pos
-                            self._board_winner_color = stone_color
-                            return True
-                        return True, stone_color
+                def check(line_pos):
+                    if set_winner:
+                        self._line_pos = line_pos
+                        self._board_winner_color = stone_color
+                        return True
+                    return True, stone_color
 
-                    is_win, line_pos = self.check_horizontal(i, j, stone_color)
-                    if is_win:
-                        return check(line_pos)
-                    is_win, line_pos = self.check_vertical(i, j, stone_color)
-                    if is_win:
-                        return check(line_pos)
-                    is_win, line_pos = self.check_diag(i, j, stone_color)
-                    if is_win:
-                        return check(line_pos)
+                is_win, line_pos = self.check_horizontal(board_array, i, j, stone_color)
+                if is_win:
+                    return check(line_pos)
+                is_win, line_pos = self.check_vertical(board_array, i, j, stone_color)
+                if is_win:
+                    return check(line_pos)
+                is_win, line_pos = self.check_diag(board_array, i, j, stone_color)
+                if is_win:
+                    return check(line_pos)
 
-        if not np.any(self._board == player.ZERO):
+        if not np.any(board_array == player.ZERO):
             if set_winner:
                 self._board_winner_color = player.DRAW
                 return True

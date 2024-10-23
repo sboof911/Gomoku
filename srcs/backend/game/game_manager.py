@@ -41,11 +41,11 @@ class game_manager:
     @property
     def is_game_over(self):
         return self._is_game_over
-    
+
     @property
     def line_pos_win(self):
         return self._board._line_pos
-    
+
     @property
     def winner_color(self):
         return self._board._board_winner_color
