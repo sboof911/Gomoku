@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+from srcs.backend.settings.settings import settings
 INIT_WIDTH = 600
 INIT_HEIGHT = 500
 
@@ -29,6 +30,7 @@ class render:
         self._window.geometry(f"{INIT_WIDTH}x{INIT_HEIGHT}")
         self._window.resizable(True, True)
         self._canvas : tk.Canvas = None
+        self._settings = settings()
 
     def get_image(self, page_name, image_name):
         current_folder = os.path.dirname(os.path.abspath(__file__))

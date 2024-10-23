@@ -1,20 +1,16 @@
-
-
-BLACK = 1
-WHITE = 2
+from srcs.backend.ai.ai_manager import ai_manager
+# from srcs.backend.game.rules_manager import rules
+# from srcs.backend.game.board import board
 
 class player:
-    def __init__(self) -> None:
-        self._player_turn = BLACK
-        self._winner = None
+    BLACK = 1
+    WHITE = -1
+    DRAW = 2
+    def __init__(self, name, stone_color):
+        self.name = name
+        self.stone_color = stone_color
+        self._ai_manager = ai_manager(stone_color)
 
-    def change_turn(self):
-        self._player_turn = BLACK if self._player_turn == WHITE else WHITE
+    def best_move(self, board, rules):
+        return self._ai_manager.choose_move(board, rules)
 
-    @property
-    def player_turn(self):
-        return self._player_turn
-    
-    @property
-    def game_status(self):
-        return "playing" # "winner" "draw"

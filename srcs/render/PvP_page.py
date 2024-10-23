@@ -5,23 +5,21 @@ from srcs.backend.game.game_manager import game_manager as game_manager_module
 TABLE_MARGE = 14
 MARGE_ERROR_THRESHOLD = 3
 
-def create_text_players(current_render : render, mode):
-    player1 = "Player 1" if mode == "players" else "Player"
+def create_text_players(current_render : render):
     current_render.canvas.create_text(
         10.0,
         90.0,
         anchor="nw",
-        text=player1,
+        text=current_render._settings.player1,
         fill="#1E1E1E",
         font=("Jaini Regular", 30 * -1)
     )
 
-    player2 = "Player 2" if mode == "players" else "AI"
     current_render.canvas.create_text(
         487.0,
         79.0,
         anchor="nw",
-        text=player2,
+        text=current_render._settings.player2,
         fill="#FCF5F5",
         font=("Jaini Regular", 30 * -1)
     )
@@ -36,6 +34,16 @@ def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
     # Draw the black disk
     canvas.create_oval(x0, y0, x1, y1, fill=color)
 
+def draw_winning_line(canvas, pos, cell_width, cell_height, color):
+    canvas.create_line(
+        TABLE_MARGE + pos["x0"] * cell_width,
+        TABLE_MARGE + pos["y0"] * cell_height,
+        TABLE_MARGE + pos["x1"] * cell_width,
+        TABLE_MARGE + pos["y1"] * cell_height,
+        fill=color,
+        width=2
+        )
+
 def board_click(event, game_manager : game_manager_module):
     canvas = event.widget
     
@@ -49,16 +57,26 @@ def board_click(event, game_manager : game_manager_module):
     # Calculate the nearest grid lines (intersections)
     nearest_col = round((x - TABLE_MARGE) / cell_width)
     nearest_row = round((y - TABLE_MARGE) / cell_height)
-    
+
     # Calculate the exact intersection coordinates
     intersection_x = TABLE_MARGE + nearest_col * cell_width
     intersection_y = TABLE_MARGE + nearest_row * cell_height
-    
+
     # Check if the click is within ±2 pixels of the intersection
     if abs(x - intersection_x) <= MARGE_ERROR_THRESHOLD and abs(y - intersection_y) <= MARGE_ERROR_THRESHOLD:
-        if game_manager.set_move(nearest_col - 1, nearest_row - 1):
-            color = "black" if game_manager.player_turn != 1 else "white"
+        if game_manager.play_turn(nearest_col, nearest_row):
+            color = "black" if game_manager.player.stone_color != game_manager.player.BLACK else "white"
             draw_circle(canvas, intersection_x, intersection_y, color)
+            if game_manager.is_game_over:
+                color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
+                draw_winning_line(canvas,
+                    game_manager.line_pos_win,
+                    cell_width,
+                    cell_height,
+                    color)
+                return True
+
+    return False
 
 
 def create_grid(canvas : Canvas, width, height, rows, cols):
@@ -76,7 +94,10 @@ def create_grid(canvas : Canvas, width, height, rows, cols):
 
 def board_game(current_render : render, game_manager : game_manager_module):
     def clicked(event):
-        board_click(event, game_manager)
+        if board_click(event, game_manager):
+            canvas.unbind("<Button-1>")
+            # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
+
     kwargs = dict(x=125.0, y=75.0, width=350.0, height=350.0)
 
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
@@ -131,12 +152,14 @@ def back_button(current_render : render):
     button_2.bind('<Enter>', button_2_hover)
     button_2.bind('<Leave>', button_2_leave)
 
-def render_game_page(current_render : render, mode):
-    game_manager = game_manager_module(mode)
+def render_PvP_page(current_render : render):
+    game_manager = game_manager_module(current_render._settings.rule)
+    game_manager.add_player(current_render._settings.player1,
+                            current_render._settings.player2)
     current_render.clear_window()
     current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
     current_render.set_backgroud()
-    create_text_players(current_render, mode)
+    create_text_players(current_render)
     board_game(current_render, game_manager)
     back_button(current_render)
