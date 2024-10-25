@@ -3,8 +3,8 @@ from srcs.render.render_init import render
 from srcs.backend.game.game_manager import game_manager as game_manager_module
 import random
 
-TABLE_MARGE = 14
-MARGE_ERROR_THRESHOLD = 3
+TABLE_MARGE = render.TABLE_MARGE
+MARGE_ERROR_THRESHOLD = render.MARGE_ERROR_THRESHOLD
 
 def create_text_players(current_render : render, player1_name, player2_name):
     current_render.canvas.create_text(
@@ -124,7 +124,8 @@ def board_game(current_render : render, game_manager : game_manager_module):
             kwargs["height"] / 2,
             image=board_game_img)
 
-    cell_width, cell_height = create_grid(canvas, rows=20, cols=20, width=kwargs["width"], height=kwargs["height"])
+    cols, rows = game_manager.board.shape
+    cell_width, cell_height = create_grid(canvas, rows=rows+1, cols=cols+1, width=kwargs["width"], height=kwargs["height"])
 
     def clicked(event):
         if board_click(event, game_manager, cell_width, cell_height):
