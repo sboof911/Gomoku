@@ -25,7 +25,7 @@ class ResizingCanvas(tk.Canvas):
 
 class render:
     TABLE_MARGE = 14
-    MARGE_ERROR_THRESHOLD = 3
+    MARGE_ERROR_THRESHOLD = 5
     def __init__(self):
         self._window = tk.Tk()
         self._window.title("Gomoku")
