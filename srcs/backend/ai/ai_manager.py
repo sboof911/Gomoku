@@ -21,8 +21,8 @@ class Minimax:
         board_array = self._board._board.copy()
         used_actions = self._board._used_actions.copy()
         if np.all(board_array == self.ZERO):
-            center = (int(board_array.shape[1]/2)+1, int(board_array.shape[0]/2)+1)
-            return center
+            center = self._board._size//2 + 1
+            return center, center
 
         _, x, y = self.minimax(board_array, opponent_color, used_actions)
         return x+1, y+1
