@@ -6,8 +6,13 @@ class Minimax:
     DRAW = 80 * BLACK
     WHITE = -1 * BLACK
     ZERO = 0 * BLACK
+    states_depth = {
+        "early":8,
+        "mid":8,
+        "late":6
+    }
 
-    def __init__(self, board, rules, depth=4) -> None:
+    def __init__(self, board, rules, depth=2) -> None:
         if self.BLACK == 0 or not isinstance(self.BLACK, int):
             raise Exception("BLACK ID MUST BE AN INT DIFFERENT THEN 0")
         from srcs.backend.game.board import board as board_module
@@ -16,8 +21,18 @@ class Minimax:
         self._board : board_module = board
         self._rules : rules_module = rules
 
+    def set_depth(self):
+        size = self._board._size**2
+        if len(self._board._used_actions) < int(size*0.2):
+            self._depth = self.states_depth["early"]
+        elif len(self._board._used_actions) < int(size*0.4):
+            self._depth = self.states_depth["mid"]
+        else:
+            self._depth = self.states_depth["late"]
+
     def get_best_move(self, stone_color):
-        opponent_color = self.WHITE if stone_color == self.BLACK else self.BLACK
+        self.set_depth()
+        opponent_color = -stone_color
         board_array = self._board._board.copy()
         used_actions = self._board._used_actions.copy()
         if np.all(board_array == self.ZERO):
@@ -39,17 +54,16 @@ class Minimax:
 
         return available_actions
 
-    def minimax(self, board_array : np.ndarray, opponent_color, used_actions,
-                x=-1, y=-1, depth=0, alpha=-10000, beta=10000):
-        stone_color = self.WHITE if opponent_color == self.BLACK else self.BLACK
+    def minimax(self, board_array : np.ndarray, opponent_color, used_actions : set,
+                x=-2, y=-2, depth=0, alpha=-10000, beta=10000):
 
-        game_over = False
         if x>=0 and y>=0:
             game_over, winner = self._board.terminal_state(x, y, opponent_color, False, board_array)
             if depth == self._depth or game_over:
                 return heuristic_evaluation(self._board, board_array, opponent_color, winner,
                                             x, y, DRAW=self.DRAW)
 
+        stone_color = -opponent_color
         best_score = 10000 * opponent_color
         best_move = (None, None)
 

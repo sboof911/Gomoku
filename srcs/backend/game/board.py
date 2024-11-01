@@ -14,7 +14,7 @@ class board:
         self._board[y][x] = player.ZERO
 
     def place_stone(self, x, y, stone_color):
-        if x > self._size or x < 0 or y > self._size or y < 0:
+        if x >= self._size or x < 0 or y >= self._size or y < 0:
             return False
 
         if self._board[y][x] == player.ZERO:
@@ -63,7 +63,7 @@ class board:
                 break
 
         return False, None
-    
+
     def check_Normal_diag(self, board_array, x, y, stone_color, connect_num):
         for i in range(connect_num):
             x_index = x - i
@@ -79,12 +79,12 @@ class board:
                 break
 
         return False, None
-    
+
     def check_Reversed_diag(self, board_array, x, y, stone_color, connect_num):
         for i in range(connect_num):
             x_index = x + i
             y_index = y - i
-            if x_index < self._size and y_index >= 0 and x_index-connect_num:
+            if x_index < self._size and y_index >= 0 and x_index-connect_num >= 0:
                 if board_array[y_index][x_index] != stone_color:
                     break
                 checker = board_array[y_index:y_index+connect_num, x_index-connect_num+1:x_index+1]
@@ -101,6 +101,7 @@ class board:
         finished, line_pos = self.check_Normal_diag(board_array, x, y, stone_color, connect_num)
         if not finished:
             finished, line_pos = self.check_Reversed_diag(board_array, x, y, stone_color, connect_num)
+
         return finished, line_pos
 
     def terminal_state(self, x, y, stone_color, set_winner = True, board_array = None):
@@ -128,4 +129,5 @@ class board:
                 return True
             else:
                 return True, player.DRAW
+
         return False if set_winner else (False, None)
