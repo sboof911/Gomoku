@@ -3,7 +3,7 @@ from srcs.backend.game.player import player
 from srcs.backend.game.rules_manager import rules
 
 class game_manager:
-    def __init__(self, rule, board_size=3, connect_num=3) -> None: # TODO: change the game mode to 19 - 5
+    def __init__(self, rule, board_size=19, connect_num=5) -> None: # TODO: change the game mode to 19 - 5
         self._board = board(board_size, connect_num)
         self._players = []
         self._current_player_index = 0
@@ -20,8 +20,8 @@ class game_manager:
     def play_turn(self, x, y):
         current_player : player = self._players[self._current_player_index]
         if self._rules.is_legal(self.board, x, y):
-            if self._board.place_stone(y-1, x-1, current_player.stone_color):
-                if self._board.terminal_state(current_player.stone_color):
+            if self._board.place_stone(x-1, y-1, current_player.stone_color):
+                if self._board.terminal_state(x-1, y-1, current_player.stone_color):
                     self._is_game_over = True
                     if self._board._board_winner_color != self.player.DRAW:
                         print(f"Player {current_player.name} wins!")

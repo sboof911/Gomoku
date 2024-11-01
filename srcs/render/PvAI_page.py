@@ -35,7 +35,7 @@ def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
     # Draw the black disk
     canvas.create_oval(x0, y0, x1, y1, fill=color)
 
-def draw_winning_line(canvas, pos, cell_width, cell_height, color):
+def draw_winning_line(canvas : Canvas, pos, cell_width, cell_height, color):
     canvas.create_line(
         TABLE_MARGE + pos["x0"] * cell_width,
         TABLE_MARGE + pos["y0"] * cell_height,
