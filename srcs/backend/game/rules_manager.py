@@ -9,4 +9,7 @@ class rules:
         self._rule = globals()[rule]()
 
     def is_legal(self, board, stepx, stepy):
+        #SUBJECT RULES
+        #.....
+        #SPECIFIEDE RULES
         return self._rule.is_legal_move(board, stepx, stepy)

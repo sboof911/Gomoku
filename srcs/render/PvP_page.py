@@ -2,8 +2,8 @@ from tkinter import Button, PhotoImage, Frame, Canvas
 from srcs.render.render_init import render
 from srcs.backend.game.game_manager import game_manager as game_manager_module
 
-TABLE_MARGE = 14
-MARGE_ERROR_THRESHOLD = 3
+TABLE_MARGE = render.TABLE_MARGE
+MARGE_ERROR_THRESHOLD = render.MARGE_ERROR_THRESHOLD
 
 def create_text_players(current_render : render):
     current_render.canvas.create_text(
@@ -44,14 +44,30 @@ def draw_winning_line(canvas, pos, cell_width, cell_height, color):
         width=2
         )
 
-def board_click(event, game_manager : game_manager_module):
+def draw_player(game_manager : game_manager_module, canvas,
+                x, y,cell_width, cell_height):
+    intersection_x = TABLE_MARGE + x * cell_width
+    intersection_y = TABLE_MARGE + y * cell_height
+    if game_manager.play_turn(x, y):
+        color = "black" if game_manager.player.stone_color != game_manager.player.BLACK else "white"
+        draw_circle(canvas, intersection_x, intersection_y, color)
+        if game_manager.is_game_over:
+            if game_manager.winner_color == game_manager.player.DRAW:
+                print("draw")
+                return True
+            color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
+            draw_winning_line(canvas,
+                game_manager.line_pos_win,
+                cell_width,
+                cell_height,
+                color)
+            return True
+    return False
+
+def board_click(event, game_manager : game_manager_module,
+                cell_width, cell_height):
     canvas = event.widget
-    
-    # Get the width and height of the Canvas
-    canvas_width = canvas.winfo_width()
-    canvas_height = canvas.winfo_height()
-    cell_width = (canvas_width - (TABLE_MARGE * 2)) / 20
-    cell_height = (canvas_height - (TABLE_MARGE * 2)) / 20
+
     x, y = event.x, event.y
 
     # Calculate the nearest grid lines (intersections)
@@ -64,17 +80,9 @@ def board_click(event, game_manager : game_manager_module):
 
     # Check if the click is within ±2 pixels of the intersection
     if abs(x - intersection_x) <= MARGE_ERROR_THRESHOLD and abs(y - intersection_y) <= MARGE_ERROR_THRESHOLD:
-        if game_manager.play_turn(nearest_col, nearest_row):
-            color = "black" if game_manager.player.stone_color != game_manager.player.BLACK else "white"
-            draw_circle(canvas, intersection_x, intersection_y, color)
-            if game_manager.is_game_over:
-                color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
-                draw_winning_line(canvas,
-                    game_manager.line_pos_win,
-                    cell_width,
-                    cell_height,
-                    color)
-                return True
+        if draw_player( game_manager, canvas, nearest_col,
+                        nearest_row, cell_width, cell_height):
+            return True
 
     return False
 
@@ -91,6 +99,8 @@ def create_grid(canvas : Canvas, width, height, rows, cols):
         canvas.create_line(x, y + i * cell_height, x + width, y + i * cell_height, fill="black")
     for j in range(cols + 1):
         canvas.create_line(x + j * cell_width, y, x + j * cell_width, y + height, fill="black")
+
+    return cell_width, cell_height
 
 def board_game(current_render : render, game_manager : game_manager_module):
     def clicked(event):
@@ -113,7 +123,13 @@ def board_game(current_render : render, game_manager : game_manager_module):
             kwargs["height"] / 2,
             image=board_game_img)
 
-    create_grid(canvas, rows=20, cols=20, width=kwargs["width"], height=kwargs["height"])
+    cols, rows = game_manager.board.shape
+    cell_width, cell_height = create_grid(canvas, rows=rows+1, cols=cols+1, width=kwargs["width"], height=kwargs["height"])
+
+    def clicked(event):
+        if board_click(event, game_manager, cell_width, cell_height):
+            canvas.unbind("<Button-1>")
+            # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
 
     canvas.bind("<Button-1>", clicked)
 
