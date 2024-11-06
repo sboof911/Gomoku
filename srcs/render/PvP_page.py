@@ -36,104 +36,116 @@ def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
 
 def draw_winning_line(canvas, pos, cell_width, cell_height, color):
     canvas.create_line(
-        TABLE_MARGE + pos["x0"] * cell_width,
-        TABLE_MARGE + pos["y0"] * cell_height,
-        TABLE_MARGE + pos["x1"] * cell_width,
-        TABLE_MARGE + pos["y1"] * cell_height,
+        pos["x0"] * cell_width,
+        pos["y0"] * cell_height,
+        pos["x1"] * cell_width,
+        pos["y1"] * cell_height,
         fill=color,
         width=2
         )
 
 def draw_player(game_manager : game_manager_module, canvas,
                 x, y,cell_width, cell_height):
-    intersection_x = TABLE_MARGE + x * cell_width
-    intersection_y = TABLE_MARGE + y * cell_height
-    if game_manager.play_turn(x, y):
-        color = "black" if game_manager.player.stone_color != game_manager.player.BLACK else "white"
-        draw_circle(canvas, intersection_x, intersection_y, color)
-        if game_manager.is_game_over:
-            if game_manager.winner_color == game_manager.player.DRAW:
-                print("draw")
-                return True
+    intersection_x = (x+1) * cell_width
+    intersection_y = (y+1) * cell_height
+    color = "black" if game_manager.board[y][x] == game_manager.player.BLACK else "white"
+    draw_circle(canvas, intersection_x, intersection_y, color)
+    if game_manager.is_game_over:
+        if game_manager.winner_color != game_manager.player.DRAW:
             color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
             draw_winning_line(canvas,
                 game_manager.line_pos_win,
                 cell_width,
                 cell_height,
                 color)
-            return True
-    return False
+
+def create_grid(canvas: Canvas, shape, cell_width, cell_height):
+    for i in range(shape + 1):
+        canvas.create_line(0, i * cell_height, shape * cell_width, i * cell_height, fill="black")
+    for i in range(shape + 1):
+        canvas.create_line(i * cell_width, 0, i * cell_height, shape * cell_height, fill="black")
+
+def draw_board(canvas : Canvas, game_manager : game_manager_module,
+               board_img, cell_width, cell_height):
+
+    canvas.delete("all")
+    canvas.create_image(
+            canvas.winfo_width() / 2,
+            canvas.winfo_height() / 2,
+            image=board_img)
+
+    create_grid(canvas, game_manager.board.shape[0]+1, cell_width, cell_height)
+    for x in range(game_manager.board.shape[0]):
+        for y in range(game_manager.board.shape[1]):
+            if game_manager.board[y][x] != game_manager.player.ZERO:
+                draw_player(game_manager, canvas, x, y, cell_width, cell_height)
 
 def board_click(event, game_manager : game_manager_module,
                 cell_width, cell_height):
-    canvas = event.widget
-
     x, y = event.x, event.y
-
     # Calculate the nearest grid lines (intersections)
-    nearest_col = round((x - TABLE_MARGE) / cell_width)
-    nearest_row = round((y - TABLE_MARGE) / cell_height)
-
+    nearest_col = round((x) / cell_width)
+    nearest_row = round((y) / cell_height)
     # Calculate the exact intersection coordinates
-    intersection_x = TABLE_MARGE + nearest_col * cell_width
-    intersection_y = TABLE_MARGE + nearest_row * cell_height
-
+    intersection_x = nearest_col * cell_width
+    intersection_y = nearest_row * cell_height
     # Check if the click is within ±2 pixels of the intersection
     if abs(x - intersection_x) <= MARGE_ERROR_THRESHOLD and abs(y - intersection_y) <= MARGE_ERROR_THRESHOLD:
-        if draw_player( game_manager, canvas, nearest_col,
-                        nearest_row, cell_width, cell_height):
+        if game_manager.play_turn(nearest_col, nearest_row):
             return True
 
     return False
 
-
-def create_grid(canvas : Canvas, width, height, rows, cols):
-    x = TABLE_MARGE
-    y = TABLE_MARGE
-    width = width - (x * 2)
-    height = height - (y * 2)
-    cell_width = width / cols
-    cell_height = height / rows
-
-    for i in range(rows + 1):
-        canvas.create_line(x, y + i * cell_height, x + width, y + i * cell_height, fill="black")
-    for j in range(cols + 1):
-        canvas.create_line(x + j * cell_width, y, x + j * cell_width, y + height, fill="black")
-
-    return cell_width, cell_height
-
 def board_game(current_render : render, game_manager : game_manager_module):
-    def clicked(event):
-        if board_click(event, game_manager):
-            canvas.unbind("<Button-1>")
-            # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
-
     kwargs = dict(x=125.0, y=75.0, width=350.0, height=350.0)
-
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
     frame = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
     frame.pack()
     frame.place(**kwargs)
-
     canvas = Canvas(frame, width=kwargs['width'], height=kwargs['height'], bg='white', highlightthickness=0)
     canvas.place(x=0, y=0)
-
     canvas.create_image(
             kwargs["width"] / 2,
             kwargs["height"] / 2,
             image=board_game_img)
 
-    cols, rows = game_manager.board.shape
-    cell_width, cell_height = create_grid(canvas, rows=rows+1, cols=cols+1, width=kwargs["width"], height=kwargs["height"])
+    ###########################################################
+
+    board_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
+    frame.update_idletasks()
+    game_frame = Frame(frame, borderwidth=0, highlightthickness=0, relief="flat")
+    game_kwargs = dict(x=TABLE_MARGE,
+                  y=TABLE_MARGE,
+                  width=canvas.winfo_width() - (2*TABLE_MARGE),
+                  height=canvas.winfo_height() - (2*TABLE_MARGE))
+    game_frame.pack()
+    game_frame.place(**game_kwargs)
+    game_canvas = Canvas(game_frame, width=game_kwargs['width'], height=game_kwargs['height'], bg='white', highlightthickness=0)
+    game_canvas.place(x=0, y=0)
+    game_frame.update_idletasks()
+
+    cell_width = game_canvas.winfo_width() / (game_manager.board.shape[0]+1)
+    cell_height = game_canvas.winfo_height() / (game_manager.board.shape[0]+1)
+    draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
 
     def clicked(event):
-        if board_click(event, game_manager, cell_width, cell_height):
-            canvas.unbind("<Button-1>")
-            # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
+        game_canvas.unbind("<Button-1>")
 
-    canvas.bind("<Button-1>", clicked)
+        if board_click(event, game_manager, cell_width, cell_height):
+            draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
+        if game_manager.is_game_over:
+            # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
+            if game_manager.winner_color == game_manager.player.DRAW:
+                print("draw")
+            else:
+                print(f"Player {game_manager.player.name} wins!")
+        else:
+            game_canvas.bind("<Button-1>", clicked)
+
+    game_canvas.bind("<Button-1>", clicked)
 
     current_render.save.append(board_game_img)
+    current_render.save.append(board_img)
 
 def back_button(current_render : render):
     from srcs.render.main_page import render_main_page
