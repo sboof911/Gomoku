@@ -8,20 +8,21 @@ class game_manager:
         self._players = []
         self._current_player_index = 0
         self._is_game_over = False
-        self._rules = rules(rule) # need to check the settings class
+        self._rules = rules(self._board, rule) # need to check the settings class
 
     def add_player(self, player1, player2):
-        self._players.append(player(player1, player.BLACK))
-        self._players.append(player(player2, player.WHITE))
+        self._players.append(player(player1, player.BLACK, self._rules))
+        self._players.append(player(player2, player.WHITE, self._rules))
 
     def switch_turns(self):
-        self._current_player_index = (self._current_player_index + 1) % 2
+        self._current_player_index = (self._current_player_index + 1) % len(self._players)
 
     def play_turn(self, x, y):
         current_player : player = self._players[self._current_player_index]
-        if self._rules.is_legal(self.board, x, y):
-            if self._board.place_stone(x-1, y-1, current_player.stone_color):
-                if self._board.terminal_state(x-1, y-1, current_player.stone_color):
+        if self._rules.is_legal(self.board, x, y, current_player.stone_color):
+            played, self._board._board = self._board.place_stone(x, y, current_player)
+            if played:
+                if self._board.terminal_state(x, y, current_player):
                     self._is_game_over = True
                     return True
 

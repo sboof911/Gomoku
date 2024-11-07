@@ -5,26 +5,51 @@ from srcs.backend.game.game_manager import game_manager as game_manager_module
 TABLE_MARGE = render.TABLE_MARGE
 MARGE_ERROR_THRESHOLD = render.MARGE_ERROR_THRESHOLD
 
-def create_text_players(current_render : render):
+player1_text_x, player1_text_y = 10.0, 90.0
+player2_text_x, player2_text_y = 487.0, 90.0
+
+def create_text_players(current_render : render, player1_name, player2_name):
     current_render.canvas.create_text(
-        10.0,
-        90.0,
+        player1_text_x,
+        player1_text_y,
         anchor="nw",
-        text=current_render._settings.player1,
+        text=player1_name,
         fill="#1E1E1E",
         font=("Jaini Regular", 30 * -1)
     )
 
+    
+
     current_render.canvas.create_text(
-        487.0,
-        79.0,
+        player2_text_x,
+        player2_text_y,
         anchor="nw",
-        text=current_render._settings.player2,
+        text=player2_name,
         fill="#FCF5F5",
         font=("Jaini Regular", 30 * -1)
     )
 
-def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
+def update_captured_text(canvas_player1 : Canvas, canvas_player2 : Canvas, game_manager : game_manager_module):
+    canvas_player1.delete("all")
+    canvas_player2.delete("all")
+    canvas_player1.create_text(
+        0,
+        0,
+        anchor="nw",
+        text=f"captured stones = {game_manager._players[0].peer_captured}",
+        fill="#000000",
+        font=("Jaini Regular", 10 * -1)
+    )
+    canvas_player2.create_text(
+        0,
+        0,
+        anchor="nw",
+        text=f"captured stones = {game_manager._players[1].peer_captured}",
+        fill="#000000",
+        font=("Jaini Regular", 10 * -1)
+    )
+
+def draw_circle(canvas : Canvas, x, y, color): #TODO: Change to an image or something
     radius = 5
 
     # The bounding box coordinates (top-left and bottom-right corners)
@@ -34,7 +59,7 @@ def draw_circle(canvas, x, y, color): #TODO: Change to an image or something
     # Draw the black disk
     canvas.create_oval(x0, y0, x1, y1, fill=color)
 
-def draw_winning_line(canvas, pos, cell_width, cell_height, color):
+def draw_winning_line(canvas : Canvas, pos, cell_width, cell_height, color):
     canvas.create_line(
         pos["x0"] * cell_width,
         pos["y0"] * cell_height,
@@ -50,14 +75,6 @@ def draw_player(game_manager : game_manager_module, canvas,
     intersection_y = (y+1) * cell_height
     color = "black" if game_manager.board[y][x] == game_manager.player.BLACK else "white"
     draw_circle(canvas, intersection_x, intersection_y, color)
-    if game_manager.is_game_over:
-        if game_manager.winner_color != game_manager.player.DRAW:
-            color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
-            draw_winning_line(canvas,
-                game_manager.line_pos_win,
-                cell_width,
-                cell_height,
-                color)
 
 def create_grid(canvas: Canvas, shape, cell_width, cell_height):
     for i in range(shape + 1):
@@ -91,17 +108,32 @@ def board_click(event, game_manager : game_manager_module,
     intersection_y = nearest_row * cell_height
     # Check if the click is within ±2 pixels of the intersection
     if abs(x - intersection_x) <= MARGE_ERROR_THRESHOLD and abs(y - intersection_y) <= MARGE_ERROR_THRESHOLD:
-        if game_manager.play_turn(nearest_col, nearest_row):
+        if game_manager.play_turn(nearest_col-1, nearest_row-1):
             return True
 
     return False
 
+def check_winner(game_manager : game_manager_module, canvas : Canvas, cell_width, cell_height):
+    # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
+    if game_manager.winner_color == game_manager.player.DRAW:
+        print("draw")
+    elif game_manager.line_pos_win is not None:
+        print(f"Player {game_manager.player.name} wins")
+        color = "black" if game_manager.winner_color != game_manager.player.BLACK else "white"
+        draw_winning_line(canvas,
+            game_manager.line_pos_win,
+            cell_width,
+            cell_height,
+            color)
+    else:
+        print(f"Player {game_manager.player.name} wins with {game_manager.player.peer_captured} captured peer!")
+
 def AI_playing(game_manager : game_manager_module):
-    if game_manager.player.name == "AI":
-        x, y = game_manager.player.best_move(game_manager._board, game_manager._rules)
+    if game_manager.player.mode == game_manager.player.AI_MODE:
+        x, y = game_manager.player.best_move(game_manager._board)
         game_manager.play_turn(x, y)
 
-def board_game(current_render : render, game_manager : game_manager_module):
+def board_game(current_render : render, game_manager : game_manager_module, Ai_mode):
     kwargs = dict(x=125.0, y=75.0, width=350.0, height=350.0)
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
     frame = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
@@ -131,33 +163,42 @@ def board_game(current_render : render, game_manager : game_manager_module):
 
     cell_width = game_canvas.winfo_width() / (game_manager.board.shape[0]+1)
     cell_height = game_canvas.winfo_height() / (game_manager.board.shape[0]+1)
-
-    AI_playing(game_manager)
+    if Ai_mode:
+        AI_playing(game_manager)
     draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
-    
-    def game_state():
-        if game_manager.is_game_over:
-            if game_manager.winner_color == game_manager.player.DRAW:
-                print("draw")
-            else:
-                print(f"Player {game_manager.player.name} wins!")
-            return True
-        return False
+
+    ###########################################################
+    # Captured frame/canvas
+    text_width = 100
+    text_height = 20
+    texts_frame_player1 = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
+    texts_frame_player1.pack()
+    texts_frame_player1.place(x=player1_text_x, y=player1_text_y+30, width=text_width, height=text_height)
+    texts_canvas_player1 = Canvas(texts_frame_player1, width=text_width, height=text_height, bg='white', highlightthickness=0)
+    texts_canvas_player1.place(x=0, y=0)
+    ##
+    texts_frame_player2 = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
+    texts_frame_player2.pack()
+    texts_frame_player2.place(x=player2_text_x, y=player2_text_y+30, width=text_width, height=text_height)
+    texts_canvas_player2 = Canvas(texts_frame_player2, width=text_width, height=text_height, bg='white', highlightthickness=0)
+    texts_canvas_player2.place(x=0, y=0)
+
+    update_captured_text(texts_canvas_player1, texts_canvas_player2, game_manager)
 
     def clicked(event):
         game_canvas.unbind("<Button-1>")
 
         if board_click(event, game_manager, cell_width, cell_height):
             draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
-            if game_state():
-                # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
-                pass
-            else:
+            update_captured_text(texts_canvas_player1, texts_canvas_player2, game_manager)
+        if game_manager.is_game_over:
+            check_winner(game_manager, game_canvas, cell_width, cell_height)
+            if Ai_mode:
+                game_manager.player.set_mode(game_manager.player.PLAYER_MODE)
                 AI_playing(game_manager)
                 draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
-                if game_state():
-                    # TODO : Need to pop a two buttons(one for new game and the other one to go back to the main_menu) 
-                    pass
+                if game_manager.is_game_over:
+                    check_winner(game_manager, game_canvas, cell_width, cell_height)
 
         if not game_manager.is_game_over:
             game_canvas.bind("<Button-1>", clicked)
@@ -200,18 +241,26 @@ def back_button(current_render : render):
     button_2.bind('<Enter>', button_2_hover)
     button_2.bind('<Leave>', button_2_leave)
 
-def render_PvAI_page(current_render : render):
-    import random
-    rnd_int = random.randint(0, 1)
-    player1_name = "AI" if rnd_int == 1 else current_render._settings.player1
-    player2_name = "AI" if rnd_int == 0 else current_render._settings.player1
+def render_Game_page(current_render : render, AI=False):
+    if AI:
+        import random
+        rnd_int = random.randint(0, 1)
+        player1_name = "AI" if rnd_int == 1 else current_render._settings.player1
+        player2_name = "AI" if rnd_int == 0 else current_render._settings.player1
+    else:
+        player1_name = current_render._settings.player1
+        player2_name = current_render._settings.player2
 
     game_manager = game_manager_module(current_render._settings.rule)
     game_manager.add_player(player1_name, player2_name)
+    for player in game_manager._players:
+        if player.name == "AI":
+            player.set_mode(player.AI_MODE)
+
     current_render.clear_window()
     current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
     current_render.set_backgroud()
-    create_text_players(current_render)
-    board_game(current_render, game_manager)
+    create_text_players(current_render, player1_name, player2_name)
+    board_game(current_render, game_manager, AI)
     back_button(current_render)
