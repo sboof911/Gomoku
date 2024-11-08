@@ -193,12 +193,11 @@ def board_game(current_render : render, game_manager : game_manager_module, Ai_m
             update_captured_text(texts_canvas_player1, texts_canvas_player2, game_manager)
         if game_manager.is_game_over:
             check_winner(game_manager, game_canvas, cell_width, cell_height)
-            if Ai_mode:
-                game_manager.player.set_mode(game_manager.player.PLAYER_MODE)
-                AI_playing(game_manager)
-                draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
-                if game_manager.is_game_over:
-                    check_winner(game_manager, game_canvas, cell_width, cell_height)
+        elif Ai_mode:
+            AI_playing(game_manager)
+            draw_board(game_canvas, game_manager, board_img, cell_width, cell_height)
+            if game_manager.is_game_over:
+                check_winner(game_manager, game_canvas, cell_width, cell_height)
 
         if not game_manager.is_game_over:
             game_canvas.bind("<Button-1>", clicked)
