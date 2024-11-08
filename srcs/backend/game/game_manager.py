@@ -1,33 +1,30 @@
 from srcs.backend.game.board import board
 from srcs.backend.game.player import player
-from srcs.backend.game.rules_manager import rules
 
 class game_manager:
     def __init__(self, rule, board_size=19, connect_num=5) -> None:
-        self._board = board(board_size, connect_num)
+        self._board = board(board_size, connect_num, rule)
         self._players = []
         self._current_player_index = 0
         self._is_game_over = False
-        self._rules = rules(self._board, rule) # need to check the settings class
 
     def add_player(self, player1, player2):
-        self._players.append(player(player1, player.BLACK, self._rules))
-        self._players.append(player(player2, player.WHITE, self._rules))
+        self._players.append(player(player1, player.BLACK))
+        self._players.append(player(player2, player.WHITE))
 
     def switch_turns(self):
         self._current_player_index = (self._current_player_index + 1) % len(self._players)
 
     def play_turn(self, x, y):
         current_player : player = self._players[self._current_player_index]
-        if self._rules.is_legal(self.board, x, y, current_player.stone_color):
-            played, self._board._board = self._board.place_stone(x, y, current_player)
-            if played:
-                if self._board.terminal_state(x, y, current_player):
-                    self._is_game_over = True
-                    return True
-
-                self.switch_turns()
+        played, self._players, self._board._board = self._board.place_stone(x, y, self._players, self._current_player_index)
+        if played:
+            if self._board.terminal_state(x, y, current_player):
+                self._is_game_over = True
                 return True
+
+            self.switch_turns()
+            return True
 
         return False
 

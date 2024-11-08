@@ -8,12 +8,12 @@ class player:
     AI_MODE = "AI"
     PLAYER_MODE = "Player"
 
-    def __init__(self, name, stone_color, rules):
+    def __init__(self, name, stone_color):
         self.name = name
         self.stone_color = stone_color
         self.peer_captured = 0
-        self.Ai = Minimax(rules)
-        self.mode = "Player"
+        self.Ai = Minimax()
+        self.mode = self.PLAYER_MODE
 
     def set_mode(self , mode : str):
         if mode in [self.AI_MODE, self.PLAYER_MODE]:

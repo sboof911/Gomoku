@@ -61,10 +61,10 @@ def draw_circle(canvas : Canvas, x, y, color): #TODO: Change to an image or some
 
 def draw_winning_line(canvas : Canvas, pos, cell_width, cell_height, color):
     canvas.create_line(
-        pos["x0"] * cell_width,
-        pos["y0"] * cell_height,
-        pos["x1"] * cell_width,
-        pos["y1"] * cell_height,
+        (pos["x0"]+1) * cell_width,
+        (pos["y0"]+1) * cell_height,
+        (pos["x1"]+1) * cell_width,
+        (pos["y1"]+1) * cell_height,
         fill=color,
         width=2
         )
