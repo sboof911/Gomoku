@@ -1,7 +1,6 @@
 from tkinter import Button, PhotoImage
 from srcs.render.render_init import render
-from srcs.render.PvP_page import render_PvP_page
-from srcs.render.PvAI_page import render_PvAI_page
+from srcs.render.game_page import render_Game_page
 
 
 def game_Title(current_render : render):
@@ -55,7 +54,7 @@ def player_AI_button(current_render : render):
         image=button_image_2,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: render_PvAI_page(current_render),
+        command=lambda: render_Game_page(current_render, True),
         relief="flat"
     )
     button_2.place(
@@ -88,7 +87,7 @@ def player_player_button(current_render : render):
         image=button_image_3,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: render_PvP_page(current_render),
+        command=lambda: render_Game_page(current_render),
         relief="flat"
     )
     button_3.place(
