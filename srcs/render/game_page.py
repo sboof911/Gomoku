@@ -130,7 +130,7 @@ def check_winner(game_manager : game_manager_module, canvas : Canvas, cell_width
 
 def AI_playing(game_manager : game_manager_module):
     if game_manager.player.mode == game_manager.player.AI_MODE:
-        x, y = game_manager.player.best_move(game_manager._board)
+        x, y = game_manager.player.best_move(game_manager._board, game_manager._players, game_manager._current_player_index)
         game_manager.play_turn(x, y)
 
 def board_game(current_render : render, game_manager : game_manager_module, Ai_mode):

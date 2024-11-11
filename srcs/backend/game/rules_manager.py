@@ -1,4 +1,5 @@
 from srcs.backend.game.rules.standard import standard
+from srcs.backend.game.player import player
 
 SUPPORTED_RULES = ["standard", "PRO", "SWAP"]
 
@@ -24,18 +25,25 @@ class rules:
         if key > 0:
             if key < len(directions):
                 if check_line(directions[key:], board_array):
+                    board_array[y][x] = player.ZERO
                     return True
+        board_array[y][x] = player.ZERO
         return False
 
-    def is_legal(self, board_array, adjucents, stone_color):
+    def is_legal(self, board_array, adjucents, stone_color, debug = False):
         #SUBJECT RULES
         pos = len(adjucents["Horizontal"]) // 2
+        if pos == 0:
+            return False
+        # TODO : FIx this shit!!
         x = adjucents["Horizontal"][pos][0]
         y = adjucents["Horizontal"][pos][1]
-        if x and y:
-            if self.double_tree(board_array.copy(), x, y, adjucents, stone_color):
-                print("Illegal move: Double three")
-                return False
-            #SPECIFIEDE RULES
-            return self._rule.is_legal_move(board_array, x, y)
+        if x != None and y != None:
+            if board_array[y][x] == player.ZERO:
+                # if self.double_tree(board_array.copy(), x, y, adjucents, stone_color):
+                #     if debug:
+                #         print("Illegal move: Double three")
+                #     return False
+                #SPECIFIEDE RULES
+                return self._rule.is_legal_move(board_array, x, y)
         return False

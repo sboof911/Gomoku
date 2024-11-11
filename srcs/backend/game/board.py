@@ -10,6 +10,18 @@ class board:
         self._board_winner_color = None
         self._line_pos = None
         self._rules = rules(self, rule)
+        self._used_actions = set()
+        
+    def get_used_actions(self, board_array):
+        used_actions = set()
+        for x in range(self._size):
+            for y in range(self._size):
+                if board_array[y][x] != player.ZERO:
+                    used_actions.add((x, y))
+        return used_actions
+
+    def set_used_actions(self):
+        self._used_actions = self.get_used_actions(self._board)
 
     def get_Adjucents(self, x, y, connect_num=None):
         adjucents = {
@@ -19,6 +31,8 @@ class board:
             "Reversed_Diag": []
         }
         connect_num = self._connect_num if connect_num is None else connect_num
+        if x is None and y is None:
+            return adjucents
 
         for i in range(-connect_num+1, connect_num):
             index = y - i
@@ -55,8 +69,10 @@ class board:
         def is_peer_captured(shape, array, key):
             help_array = []
             for x, y in array[key:len(shape)+key]:
-                if x and y:
+                if x != None and y != None:
                     help_array.append(board_array[y][x])
+                else:
+                    break
             if len(shape) == len(help_array):
                 if np.all(shape == help_array):
                     return True
@@ -65,7 +81,7 @@ class board:
         shape = [player.BLACK, player.WHITE, player.WHITE, player.BLACK]
         for direction in ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]:
             for key, (x, y) in enumerate(adjucents[direction]):
-                if x and y:
+                if x != None and y != None:
                     if board_array[y][x] != player.ZERO:
                         curr_shape = np.multiply(shape, -1) if board_array[y][x] < 0 else shape
                         if is_peer_captured(curr_shape, adjucents[direction], key):
@@ -82,24 +98,23 @@ class board:
 
         return board_array, player0_peer_captured, player1_peer_captured
 
-    def place_stone(self, x, y, players, curr_player_index, board_array=None):
+    def place_stone(self, x, y, players, curr_player_index, board_array=None, debug=False):
         board_array = self._board if board_array is None else board_array
         adjucents = self.get_Adjucents(x, y)
-        if self._rules.is_legal(board_array, adjucents, players[curr_player_index].stone_color):
-            if board_array[y][x] == player.ZERO:
-                board_array[y][x] = players[curr_player_index].stone_color
-                board_array, peer0_captured, peer1_captured = self.check_capture(adjucents, players, board_array.copy())
-                players[0].peer_captured += peer0_captured
-                players[1].peer_captured += peer1_captured
-                return True, players, board_array
+        if self._rules.is_legal(board_array, adjucents, players[curr_player_index].stone_color, debug):
+            board_array[y][x] = players[curr_player_index].stone_color
+            board_array, peer0_captured, peer1_captured = self.check_capture(adjucents, players, board_array)
+            players[0].peer_captured += peer0_captured
+            players[1].peer_captured += peer1_captured
+            return True, board_array
 
-        return False, players, board_array
+        return False, board_array
 
     def check_direction(self, stone_color, board_array, adjucents, direction, connect_num=None):
         connect_num = self._connect_num if connect_num is None else connect_num
         count = 0
         for key, (x, y) in enumerate(adjucents[direction]):
-            if x and y:
+            if x != None and y != None:
                 if board_array[y][x] == stone_color:
                     count += 1
                     if count == connect_num:
