@@ -40,10 +40,10 @@ class rules:
         y = adjucents["Horizontal"][pos][1]
         if x != None and y != None:
             if board_array[y][x] == player.ZERO:
-                # if self.double_tree(board_array.copy(), x, y, adjucents, stone_color):
-                #     if debug:
-                #         print("Illegal move: Double three")
-                #     return False
+                if self.double_tree(board_array.copy(), x, y, adjucents, stone_color):
+                    if debug:
+                        print("Illegal move: Double three")
+                    return False
                 #SPECIFIEDE RULES
                 return self._rule.is_legal_move(board_array, x, y)
         return False

@@ -11,7 +11,7 @@ class board:
         self._line_pos = None
         self._rules = rules(self, rule)
         self._used_actions = set()
-        
+
     def get_used_actions(self, board_array):
         used_actions = set()
         for x in range(self._size):
