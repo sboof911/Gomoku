@@ -46,10 +46,105 @@ def evaluate(board, board_array, player, x_value, y_value):
 
         return score*(player.peer_captured+1) if player.peer_captured > 0 else score
 
-def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
-    if winner == DRAW:
-        return 0
-    elif winner != None:
-        return MAX_SCORE*(depth+1)*player.stone_color
+# def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
+#     if winner == DRAW:
+#         return 0
+#     elif winner != None:
+#         return MAX_SCORE*(depth+1)*player.stone_color
 
-    return evaluate(board, board_array, player, x, y)*player.stone_color
+#     return evaluate(board, board_array, player, x, y)*player.stone_color
+
+
+
+
+################################################################
+WIN = float('inf') - 100
+
+def check_index(board, x, y):
+    if x < 0 or y < 0:
+        return False
+    if x >= board.shape[1] or y >= board.shape[0]:
+        return False
+    return True
+
+def nb_in_line(board, x, y, dx, dy, stone_color):
+    ttl = 1
+    free_extrems = 0
+    blank = 0
+
+    nx, ny = x + dx, y + dy
+    while check_index(board, nx, ny) and board[ny][nx] == stone_color:
+        nx += dx
+        ny += dy
+        ttl += 1
+    if check_index(board, nx, ny) and board[ny][nx] != -stone_color:
+        free_extrems += 1
+        while check_index(board, nx, ny) and board[ny][nx] == 0 and blank + ttl < 6:
+            nx += dx
+            ny += dy
+            blank += 1
+
+    nx, ny = x - dx, y - dy
+    while check_index(board, nx, ny) and board[ny][nx] == stone_color:
+        nx -= dx
+        ny -= dy
+        ttl += 1
+    if check_index(board, nx, ny) and board[ny][nx] != -stone_color:
+        free_extrems += 1
+        while check_index(board, nx, ny) and board[ny][nx] == 0 and blank + ttl < 6:
+            nx -= dx
+            ny -= dy
+            blank += 1
+
+    if blank + ttl < 5:
+        return 0
+    elif ttl >= 5:
+        return WIN + (ttl - 5) * free_extrems
+    elif free_extrems == 2 and ttl >= 4:
+        return WIN - 1
+    elif ttl > 0:
+        return ttl * free_extrems
+    else:
+        return 0
+
+def tile_value(board, x, y, stone_color):
+    ttl_tile = 0
+    score_tile = nb_in_line(board, x, y, 1, 1, stone_color)
+    if score_tile >= WIN - 10:
+        return WIN
+    ttl_tile += score_tile
+    score_tile = nb_in_line(board, x, y, 0, 1, stone_color)
+    if score_tile >= WIN - 10:
+        return WIN
+    ttl_tile += score_tile
+    score_tile = nb_in_line(board, x, y, 1, 0, stone_color)
+    if score_tile >= WIN - 10:
+        return WIN
+    ttl_tile += score_tile
+    score_tile = nb_in_line(board, x, y, 1, -1, stone_color)
+    if score_tile >= WIN - 10:
+        return WIN
+    ttl_tile += score_tile
+    return ttl_tile
+
+def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
+    player_score = player.peer_captured ** 2
+    enemy_score = 0
+
+    tile = board_array[y][x]
+
+    if player.stone_color == tile:
+        tile_score = tile_value(board_array, x, y, player.stone_color)
+        if tile_score >= WIN - 10:
+            return tile_score
+        else:
+            player_score += tile_score
+    elif -player.stone_color == tile:
+        tile_score = tile_value(board_array, x, y, -player.stone_color)
+        if tile_score >= WIN - 10:
+            return tile_score
+        if tile_score == WIN:
+            return -float('inf')
+        else:
+            enemy_score += tile_score
+    return player_score - enemy_score
