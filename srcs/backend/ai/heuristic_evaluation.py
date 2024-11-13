@@ -1,12 +1,15 @@
-import numpy as np
-
 MAX_SCORE = 200
 
 def evaluate(board, board_array, player, x_value, y_value):
-        absulute_win = [0, 1, 1, 1, 1, 0]
+        absulute_win = [0]
+        for i in range(1, board._connect_num):
+            absulute_win.append(1)
+        absulute_win.append(0)
+
         directions = ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]
-        adjucents = board.get_Adjucents(x_value, y_value, 6)
-        score = 0
+        adjucents = board.get_Adjucents(x_value, y_value)
+        score = 1
+
         for direction in directions:
             count = 0
             curr_score = 2
@@ -41,14 +44,12 @@ def evaluate(board, board_array, player, x_value, y_value):
                         length = 0
             score += curr_score
 
-        return score*player.peer_captured
+        return score*(player.peer_captured+1) if player.peer_captured > 0 else score
 
 def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
     if winner == DRAW:
         return 0
     elif winner != None:
-        return MAX_SCORE*player.stone_color*depth
+        return MAX_SCORE*(depth+1)*player.stone_color
 
-    score = evaluate(board, board_array, player, x, y)
-    return score*player.stone_color
-
+    return evaluate(board, board_array, player, x, y)*player.stone_color

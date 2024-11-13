@@ -7,7 +7,7 @@ class Minimax:
     WHITE = -1 * BLACK
     ZERO = 0 * BLACK
 
-    def __init__(self, depth=6, debug_mode=False) -> None:
+    def __init__(self, depth=5, debug_mode=False) -> None:
         if self.BLACK == 0 or not isinstance(self.BLACK, int):
             raise Exception("BLACK ID MUST BE AN INT DIFFERENT THEN 0")
         from srcs.backend.game.board import board as board_module
@@ -16,7 +16,7 @@ class Minimax:
         self._board : board_module = None
         self._debug_mode = debug_mode
 
-    def get_best_available_actions(self, board_array, x0=-2, y0=-2):
+    def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
         available_actions = set()
         if x0 == -2 and y0 == -2:
             if not self._board._used_actions:
@@ -28,13 +28,22 @@ class Minimax:
             used_actions = [(x0, y0)]
 
         for x, y in used_actions:
-            boarder_num = 2
-            for y1 in range(y-boarder_num,y+boarder_num+1):
-                for x1 in range(x-boarder_num,x+boarder_num+1):
+            for y1 in range(y-connect_num,y+connect_num+1):
+                for x1 in range(x-connect_num,x+connect_num+1):
                     if 0 <= x1 < self._board._size and 0 <= y1 < self._board._size:
                         if board_array[y1][x1] == self.ZERO:
                             available_actions.add((x1, y1))
+
         return available_actions
+    
+    # def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
+    #     available_actions = set()
+    #     for x in range(self._board._size):
+    #         for y in range(self._board._size):
+    #             if board_array[y][x] == self.ZERO:
+    #                 available_actions.add((x, y))
+
+    #     return available_actions
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
@@ -52,13 +61,13 @@ class Minimax:
     def minimax(self, board_array, depth, is_maximizing, players, current_player_index,
                 x=-2, y=-2, alpha=float('-inf'), beta=float('inf')):
         # Terminal state
-
         if x >= 0 and y >= 0:
             opponent_player = players[(current_player_index + 1) % 2]
             game_over, winner = self._board.terminal_state(x, y, opponent_player, False, board_array)
             if game_over or depth == 0:
-                return heuristic_evaluation(self._board, board_array, opponent_player, winner,
-                                            x, y, self.DRAW, depth), None, None
+                score = heuristic_evaluation(self._board, board_array, opponent_player, winner,
+                                             x, y, self.DRAW, depth)
+                return score, None, None
 
         # Maximizing player
         return_value = None
@@ -69,10 +78,17 @@ class Minimax:
             best_move = (None, None)
             for x, y in available_actions:
                 players_copy = [player.clone() for player in players]
-                played, board_array = self._board.place_stone(x, y, players_copy, current_player_index, board_array)
-                if played:
-                    eval, _, _ = self.minimax(board_array, depth - 1, False, players_copy, (current_player_index + 1) % 2, x, y, alpha, beta)
+                played, board_array, captured_stones_pos = self._board.place_stone(x, y, players_copy, current_player_index, board_array)
+                if played and board_array[y][x] != players[0].ZERO:
+                    eval = self.minimax(board_array, depth-1, False, players_copy, (current_player_index + 1) % 2, x, y, alpha, beta)[0]
+                    # if self._board._turns > 2 and depth == self._depth:
+                    #     print(board_array)
+                    #     print(eval)
+                    # print(f"Max Eval: {eval}")
                     board_array[y][x] = players[0].ZERO
+                    for key in captured_stones_pos:
+                        for x0, y0 in captured_stones_pos[key]:
+                            board_array[y0][x0] = int(key)
                     if eval > max_eval:
                         max_eval = eval
                         best_move = (x, y)
@@ -89,10 +105,14 @@ class Minimax:
             best_move = (None, None)
             for x, y in available_actions:
                 players_copy = [player.clone() for player in players]
-                played, board_array = self._board.place_stone(x, y, players_copy, current_player_index, board_array)
-                if played:
-                    eval, _, _ = self.minimax(board_array, depth - 1, True, players_copy, (current_player_index + 1) % 2, x, y, alpha, beta)
+                played, board_array, captured_stones_pos = self._board.place_stone(x, y, players_copy, current_player_index, board_array)
+                if played and board_array[y][x] != players[0].ZERO:
+                    eval = self.minimax(board_array, depth-1, True, players_copy, (current_player_index + 1) % 2, x, y, alpha, beta)[0]
+                    # print(eval)
                     board_array[y][x] = players[0].ZERO
+                    for key in captured_stones_pos:
+                        for x0, y0 in captured_stones_pos[key]:
+                            board_array[y0][x0] = int(key)
                     if eval < min_eval:
                         min_eval = eval
                         best_move = (x, y)
