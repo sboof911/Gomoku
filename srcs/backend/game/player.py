@@ -25,6 +25,3 @@ class player:
 
     def best_move(self, board, players, current_player_index):
         return self.Ai.get_best_move(board, players, current_player_index)
-
-    def clone(self):
-        return player(self.name, self.stone_color, debug_mode=self._debug_mode, copy_mode=True)

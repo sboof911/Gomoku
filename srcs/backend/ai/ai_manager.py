@@ -1,5 +1,5 @@
 from time import time
-from srcs.backend.ai.heuristic_evaluation import heuristic_evaluation
+from srcs.backend.ai.heuristic_evaluation import heuristic_evaluation, MAX_SCORE
 
 class Minimax:
     BLACK = 1
@@ -15,6 +15,7 @@ class Minimax:
         self._depth = depth
         self._board : board_module = None
         self._debug_mode = debug_mode
+        self._players = None
 
     # def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
     #     available_actions = set()
@@ -35,7 +36,7 @@ class Minimax:
     #                         available_actions.add((x1, y1))
 
     #     return available_actions
-    
+
     def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
         available_actions = set()
         for x in range(self._board._size):
@@ -47,41 +48,41 @@ class Minimax:
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
-        board_array = self._board._board.copy()
+        board_array = self._board._board
+        self._players = players
         current_time = time()
-        is_maximizing = True if players[current_player_index].stone_color == self.BLACK else False
 
-        _, x, y = self.negamax(board_array, self._depth, players, current_player_index)
+        _, x, y = self.negamax(board_array, self._depth, current_player_index)
         if self._debug_mode:
             print("Can't print the time, debug mode is on")
         else:
             print(f"Time to get best move:{time()-current_time:.2f}s")
         return x, y
 
-    def negamax(self, board_array, depth, players, current_player_index,
-                x=-2, y=-2, alpha=float('-inf'), beta=float('inf')):
+    def negamax(self, board_array, depth, current_player_index,
+                x_value=-2, y_value=-2, alpha=float('-inf'), beta=float('inf')):
         # Terminal state
-        if x >= 0 and y >= 0:
-            opponent_player = players[(current_player_index + 1) % 2]
-            game_over, winner = self._board.terminal_state(x, y, opponent_player, False, board_array)
+        if x_value >= 0 and y_value >= 0:
+            opponent_player = self._players[(current_player_index + 1) % 2]
+            game_over, winner = self._board.terminal_state(x_value, y_value, opponent_player, False, board_array)
             if game_over or depth == 0:
                 score = heuristic_evaluation(self._board, board_array, opponent_player, winner,
-                                            x, y, self.DRAW, depth)*opponent_player.stone_color
+                                            x_value, y_value, self.DRAW, depth)*opponent_player.stone_color
                 return score, None, None
 
-        available_actions = self.get_best_available_actions(board_array, x, y)
+        available_actions = self.get_best_available_actions(board_array, x_value, y_value)
         max_eval = float('-inf')
-        best_move = (None, None)
+        best_move = (0, 0)
 
         for x, y in available_actions:
-            players_copy = [player.clone() for player in players]
-            played, board_array, captured_stones_pos = self._board.place_stone(x, y, players_copy, current_player_index, board_array)
-            if played and board_array[y][x] != players[0].ZERO:
-                eval = -self.negamax(board_array, depth-1, players_copy, (current_player_index + 1) % 2, x, y, -beta, -alpha)[0]
-                board_array[y][x] = players[0].ZERO
-                for key in captured_stones_pos:
-                    for x0, y0 in captured_stones_pos[key]:
-                        board_array[y0][x0] = int(key)
+            board_array_copy = board_array.copy()
+            player1_capture = self._players[0].peer_captured
+            player2_capture = self._players[1].peer_captured
+            played, board_array_copy, captured_stones_pos = self._board.place_stone(x, y, self._players, current_player_index, board_array_copy)
+            if played and board_array_copy[y][x] != self._players[0].ZERO:
+                eval = self.negamax(board_array_copy, depth-1, (current_player_index + 1) % 2, x, y, -beta, -alpha)[0]
+                self._players[0].peer_captured = player1_capture
+                self._players[1].peer_captured = player2_capture
                 if eval > max_eval:
                     max_eval = eval
                     best_move = (x, y)
@@ -90,4 +91,4 @@ class Minimax:
                 if alpha >= beta:
                     break
 
-        return max_eval, best_move[0], best_move[1]
+        return -max_eval, best_move[0], best_move[1]

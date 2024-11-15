@@ -79,7 +79,7 @@ class board:
             return False
 
         shape = [player.BLACK, player.WHITE, player.WHITE, player.BLACK]
-        captured_stones_pos = {str(players[0].stone_color): set(), str(players[1].stone_color): set()}
+        captured_stones_pos = {0: set(), 1: set()}
         for direction in ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]:
             for key, (x, y) in enumerate(adjucents[direction]):
                 if x != None and y != None:
@@ -89,7 +89,8 @@ class board:
                             for i in range(1, len(shape)-1):
                                 x0 = adjucents[direction][key+i][0]
                                 y0 = adjucents[direction][key+i][1]
-                                captured_stones_pos[str(board_array[y0][x0])].add((x0, y0))
+                                idx = 1 if board_array[y][x] == player.BLACK else 0
+                                captured_stones_pos[idx].add((x0, y0))
                                 board_array[y0][x0] = player.ZERO
 
         return board_array, captured_stones_pos
@@ -100,8 +101,8 @@ class board:
         if self._rules.is_legal(board_array, adjucents, players[curr_player_index].stone_color, debug):
             board_array[y][x] = players[curr_player_index].stone_color
             board_array, captured_stones_pos = self.check_capture(adjucents, players, board_array)
-            players[0].peer_captured += len(captured_stones_pos[str(players[1].stone_color)])//2
-            players[1].peer_captured += len(captured_stones_pos[str(players[0].stone_color)])//2
+            players[0].peer_captured += len(captured_stones_pos[1])//2
+            players[1].peer_captured += len(captured_stones_pos[0])//2
             return True, board_array, captured_stones_pos
 
         return False, board_array, {}
