@@ -1,4 +1,5 @@
 from srcs.backend.game.rules.standard import standard
+from srcs.backend.game.player import player
 
 SUPPORTED_RULES = ["standard", "PRO", "SWAP"]
 
@@ -12,7 +13,7 @@ class rules:
 
     def double_tree(self, board_array, x, y, adjucents, stone_color):
         def check_line(directions, board_array):
-            connect_num = self._board._connect_num - 2
+            connect_num = (self._board._connect_num // 2)+1
             for key, direction in enumerate(directions):
                 if self._board.check_direction(stone_color, board_array, adjucents, direction, connect_num)[0]:
                     return key+1
@@ -21,21 +22,25 @@ class rules:
         board_array[y][x] = stone_color
         directions = ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]
         key = check_line(directions, board_array)
-        if key > 0:
-            if key < len(directions):
-                if check_line(directions[key:], board_array):
-                    return True
+        if 0 < key < len(directions):
+            if check_line(directions[key:], board_array):
+                board_array[y][x] = player.ZERO
+                return True
+        board_array[y][x] = player.ZERO
         return False
 
-    def is_legal(self, board_array, adjucents, stone_color):
+    def is_legal(self, board_array, adjucents, stone_color, debug = False):
         #SUBJECT RULES
         pos = len(adjucents["Horizontal"]) // 2
+
         x = adjucents["Horizontal"][pos][0]
         y = adjucents["Horizontal"][pos][1]
-        if x and y:
-            if self.double_tree(board_array.copy(), x, y, adjucents, stone_color):
-                print("Illegal move: Double three")
-                return False
-            #SPECIFIEDE RULES
-            return self._rule.is_legal_move(board_array, x, y)
+        if x != None and y != None:
+            if board_array[y][x] == player.ZERO:
+                if self.double_tree(board_array, x, y, adjucents, stone_color):
+                    if debug:
+                        print("Illegal move: Double three")
+                    return False
+                #SPECIFIEDE RULES
+                return self._rule.is_legal_move(board_array, x, y)
         return False
