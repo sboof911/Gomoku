@@ -1,2 +1,2 @@
 [console_scripts]
-gomoku = main:lanch_game
+gomoku = main:launch_game

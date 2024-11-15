@@ -6,10 +6,11 @@ setup(
     packages=find_packages(),
     install_requires=[
         'numpy',
+        'icecream'
     ],
     entry_points={
         'console_scripts': [
-            'gomoku=main:lanch_game',
+            'gomoku=main:launch_game',
         ],
     },
     author='Mohamed alaoui',
