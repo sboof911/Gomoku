@@ -3,7 +3,7 @@ MAX_SCORE = 500
 def evaluate(board, board_array, player, x_value, y_value):
         directions = ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]
         adjucents = board.get_Adjucents(x_value, y_value)
-        score = 0
+        score = player.peer_captured ** 2
         pos = len(adjucents[directions[0]]) // 2 
 
         for direction in directions:
@@ -42,15 +42,15 @@ def evaluate(board, board_array, player, x_value, y_value):
             else:
                 score += 1
 
-        return score*(player.peer_captured+1) if player.peer_captured > 0 else score
+        return score
 
-# def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
-#     if winner == DRAW:
-#         return 0
-#     elif winner != None:
-#         return MAX_SCORE
+def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
+    if winner == DRAW:
+        return 0
+    elif winner != None:
+        return MAX_SCORE
 
-#     return evaluate(board, board_array, player, x, y)
+    return evaluate(board, board_array, player, x, y)
 
 
 
@@ -126,26 +126,31 @@ def tile_value(board, x, y, stone_color):
     ttl_tile += score_tile
     return ttl_tile
 
-def heuristic_evaluation(board, board_array, player, winner, x0, y0, DRAW, depth):
-    player_score = player.peer_captured ** 2
-    enemy_score = 0
+# def heuristic_evaluation(board, board_array, player, winner, x, y, DRAW, depth):
+#     if winner is not None:
+#         if winner == DRAW:
+#             return 0
+#         return MAX_SCORE
+#     player_score = player.peer_captured ** 2
+#     enemy_score = 0
 
-    tile = player.stone_color
+#     tile = player.stone_color
 
-    for x in range(board._size):
-        for y in range(board._size):
-            if player.stone_color == tile:
-                tile_score = tile_value(board_array, x, y, player.stone_color)
-                if tile_score >= MAX_SCORE - 10:
-                    return tile_score
-                else:
-                    player_score += tile_score
-            elif -player.stone_color == tile:
-                tile_score = tile_value(board_array, x, y, -player.stone_color)
-                if tile_score >= MAX_SCORE - 10:
-                    return tile_score
-                if tile_score == MAX_SCORE:
-                    return -float('inf')
-                else:
-                    enemy_score += tile_score
-    return player_score - enemy_score
+#     # for x in range(board._size):
+#     #     for y in range(board._size):
+#     if player.stone_color == tile:
+#         tile_score = tile_value(board_array, x, y, player.stone_color)
+#         if tile_score >= MAX_SCORE - 10:
+#             return tile_score
+#         else:
+#             player_score += tile_score
+#     elif -player.stone_color == tile:
+#         tile_score = tile_value(board_array, x, y, -player.stone_color)
+#         if tile_score >= MAX_SCORE - 10:
+#             return tile_score
+#         if tile_score == MAX_SCORE:
+#             return -float('inf')
+#         else:
+#             enemy_score += tile_score
+
+#     return player_score - enemy_score

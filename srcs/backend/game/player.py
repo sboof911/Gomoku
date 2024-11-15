@@ -1,10 +1,10 @@
-from srcs.backend.ai.ai_manager import Minimax
+from srcs.backend.ai.ai_manager import AI_manager
 
 class player:
-    BLACK = Minimax.BLACK
-    WHITE = Minimax.WHITE
-    DRAW = Minimax.DRAW
-    ZERO = Minimax.ZERO
+    BLACK = AI_manager.BLACK
+    WHITE = AI_manager.WHITE
+    DRAW = AI_manager.DRAW
+    ZERO = AI_manager.ZERO
     AI_MODE = "AI"
     PLAYER_MODE = "Player"
 
@@ -14,7 +14,7 @@ class player:
         self.peer_captured = 0
         self._debug_mode = debug_mode
         if not copy_mode:
-            self.Ai = Minimax(debug_mode=debug_mode)
+            self.Ai = AI_manager(debug_mode=debug_mode)
         self.mode = self.PLAYER_MODE
 
     def set_mode(self , mode : str):
