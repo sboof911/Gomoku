@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: Gomoku
+Version: 0.1
+Summary: Gomuku Project
+Home-page: https://github.com/sboof911/Gomoku
+Author: Mohamed alaoui
+Author-email: malaoui@student.1337.ma
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Dist: numpy

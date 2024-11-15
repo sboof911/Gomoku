@@ -1,0 +1,2 @@
+[console_scripts]
+gomoku = main:lanch_game
