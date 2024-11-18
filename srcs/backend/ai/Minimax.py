@@ -53,7 +53,8 @@ def get_best_available_actions(board, ZERO, board_array, x0=-2, y0=-2, connect_n
     return available_actions
 
 def negamax(board, board_array, depth, players, current_player_index,
-            x_value=-2, y_value=-2, alpha=float('-inf'), beta=float('inf')):
+            x_value=-2, y_value=-2, alpha=float('-inf'), beta=float('inf'),
+            queue_list=None, available_actions=None):
     # Terminal state
     if x_value >= 0 and y_value >= 0:
         opponent_player = players[(current_player_index + 1) % 2]
@@ -63,18 +64,17 @@ def negamax(board, board_array, depth, players, current_player_index,
                                         x_value, y_value, players[0].DRAW, depth)*opponent_player.stone_color
             return score, None, None
 
-    available_actions = get_best_available_actions(board, players[0].ZERO, board_array, x_value, y_value)
+    if not available_actions:
+        available_actions = get_best_available_actions(board, players[0].ZERO, board_array, x_value, y_value)
+
     max_eval = float('-inf')
     best_move = (0, 0)
     for x, y in available_actions:
         board_array_copy = board_array.copy()
-        player1_capture = players[0].peer_captured
-        player2_capture = players[1].peer_captured
-        played, board_array_copy = board.place_stone(x, y, players, current_player_index, board_array_copy)
+        players_copy = [player.clone() for player in players]
+        played, board_array_copy = board.place_stone(x, y, players_copy, current_player_index, board_array_copy)
         if played and board_array_copy[y][x] != players[0].ZERO:
-            eval = negamax(board, board_array_copy, depth-1, players, (current_player_index + 1) % 2, x, y, -beta, -alpha)[0]
-            players[0].peer_captured = player1_capture
-            players[1].peer_captured = player2_capture
+            eval = negamax(board, board_array_copy, depth-1, players_copy, (current_player_index + 1) % 2, x, y, -beta, -alpha)[0]
 
             if eval > max_eval:
                 max_eval = eval
@@ -83,5 +83,8 @@ def negamax(board, board_array, depth, players, current_player_index,
             alpha = max(alpha, eval)
             if alpha >= beta:
                 break
+            
+    if queue_list:
+        queue_list.put((max_eval, best_move[0], best_move[1]))
 
     return -max_eval, best_move[0], best_move[1]
