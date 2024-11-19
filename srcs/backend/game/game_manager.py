@@ -22,6 +22,7 @@ class game_manager:
         played, self._board._board = self._board.place_stone(x, y, self._players, self._current_player_index, debug=True)
         if played:
             self._board.set_used_actions()
+            self._board.last_play = x, y
             if self._board.terminal_state(x, y, current_player):
                 self._is_game_over = True
                 return True

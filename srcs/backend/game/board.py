@@ -11,10 +11,29 @@ class board:
         self._line_pos = None
         self._rules = rules(self, rule)
         self._used_actions = set()
-        self._turns = 0
+        self._turns = 1
+        self._last_play = None
 
     def next_turn(self):
         self._turns += 1
+
+    @property
+    def last_play(self):
+        return self._last_play
+
+    @last_play.setter
+    def last_play(self, value):
+        if not isinstance(value, tuple):
+            raise ValueError(f"Invalid value, expected: tuple got: {type(value)}")
+        x, y = value
+        if isinstance(x, int) and isinstance(y, int):
+            if 0 <= x < self._size and 0 <= y < self._size:
+                self._last_play = (x, y)
+            else:
+                raise ValueError(f"Invalid value, expected: (0 <= x < {self._size}, 0 <= y < {self._size}) got: ({x}, {y})")
+        else:
+            raise ValueError(f"Invalid value, expected: (int, int) got: ({type(x)}, {type(y)})")
+        
 
     def get_used_actions(self, board_array):
         used_actions = set()
@@ -65,7 +84,7 @@ class board:
 
         return adjucents
 
-    def check_capture(self, adjucents, players, board_array):
+    def check_capture(self, adjucents, board_array):
         def is_peer_captured(shape, array, key):
             help_array = []
             for x, y in array[key:len(shape)+key]:
@@ -100,7 +119,7 @@ class board:
         adjucents = self.get_Adjucents(x, y)
         if self._rules.is_legal(board_array, adjucents, players[curr_player_index].stone_color, debug):
             board_array[y][x] = players[curr_player_index].stone_color
-            board_array, captured_stones_pos = self.check_capture(adjucents, players, board_array)
+            board_array, captured_stones_pos = self.check_capture(adjucents, board_array)
             players[0].peer_captured += len(captured_stones_pos[1])//2
             players[1].peer_captured += len(captured_stones_pos[0])//2
             return True, board_array
@@ -139,7 +158,7 @@ class board:
         return False, None
 
     def terminal_state(self, x, y, player : player, set_winner=True, board_array=None):
-        if player.peer_captured >= 10:
+        if player.peer_captured >= player._max_peer_capture:
             if set_winner:
                 self._board_winner_color = player.stone_color
                 return True

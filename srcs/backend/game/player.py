@@ -13,6 +13,7 @@ class player:
         self.stone_color = stone_color
         self.peer_captured = peer_captured
         self._debug_mode = debug_mode
+        self._max_peer_capture = 5
         if not copy_mode:
             self.Ai = AI_manager(debug_mode=debug_mode)
         self.mode = mode
