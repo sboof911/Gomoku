@@ -28,16 +28,13 @@ def get_best_available_actions(board, ZERO, board_array, x1=-2, y1=-2, connect_n
 
 def negamax(board, board_array, depth, players, current_player_index,
             x_value=-2, y_value=-2, alpha=float('-inf'), beta=float('inf'),
-            queue_list=None, available_actions=None, scores=0):
+            queue_list=None, available_actions=None):
 
     if x_value >= 0 and y_value >= 0:
         opponent_player = players[(current_player_index + 1) % 2]
         score = heuristic_evaluation(board_array, opponent_player, x_value, y_value, board._connect_num)
-        scores += score*opponent_player.stone_color
-        if score >= MAX_SCORE:
-            return score*(depth+1), None, None
-        elif depth == 0:
-            return scores, None, None
+        if score >= MAX_SCORE or depth == 0:
+            return score, None, None
 
     if not available_actions:
         available_actions = get_best_available_actions(board, players[0].ZERO, board_array, x_value, y_value)
