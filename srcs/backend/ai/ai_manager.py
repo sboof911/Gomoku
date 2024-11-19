@@ -1,94 +1,140 @@
 from time import time
-from srcs.backend.ai.heuristic_evaluation import heuristic_evaluation, MAX_SCORE
+from srcs.backend.ai.Minimax import negamax
+from threading import Thread
+from queue import Queue
+from os import cpu_count
 
-class Minimax:
+class AI_manager():
     BLACK = 1
     DRAW = 80 * BLACK
     WHITE = -1 * BLACK
     ZERO = 0 * BLACK
 
-    def __init__(self, depth=3, debug_mode=False) -> None:
-        if self.BLACK == 0 or not isinstance(self.BLACK, int):
-            raise Exception("BLACK ID MUST BE AN INT DIFFERENT THEN 0")
-        from srcs.backend.game.board import board as board_module
-
-        self._depth = depth
-        self._board : board_module = None
+    def __init__(self, difficulty, debug_mode=False) -> None:
+        self._depth = self.get_depth(difficulty)
         self._debug_mode = debug_mode
-        self._players = None
+        self._thread_num = cpu_count()
+        
+    def get_depth(self, difficulty):
+        if difficulty == 1:
+            return 3
+        elif difficulty == 2:
+            return 7
+        else:
+            return 11
+        # depths = {
+        #     "early": 3,
+        #     "mid": 4,
+        #     "late": 5
+        # }
 
-    # def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
-    #     available_actions = set()
-    #     if x0 == -2 and y0 == -2:
-    #         if not self._board._used_actions:
-    #             center = self._board._size//2
-    #             used_actions = [(center, center)]
-    #         else:
-    #             used_actions = self._board._used_actions
-    #     else:
-    #         used_actions = [(x0, y0)]
-
-    #     for x, y in used_actions:
-    #         for y1 in range(y-connect_num,y+connect_num+1):
-    #             for x1 in range(x-connect_num,x+connect_num+1):
-    #                 if 0 <= x1 < self._board._size and 0 <= y1 < self._board._size:
-    #                     if board_array[y1][x1] == self.ZERO:
-    #                         available_actions.add((x1, y1))
-
-    #     return available_actions
-
-    def get_best_available_actions(self, board_array, x0=-2, y0=-2, connect_num=2):
-        available_actions = set()
-        for x in range(self._board._size):
-            for y in range(self._board._size):
-                if board_array[y][x] == self.ZERO:
-                    available_actions.add((x, y))
-
-        return available_actions
+        # if self._board._turns < 3:
+        #     return depths["early"]
+        # elif self._board._turns < 11:
+        #     return depths["mid"]
+        # else:
+        #     return depths["late"]
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
-        board_array = self._board._board
         self._players = players
         current_time = time()
 
-        _, x, y = self.negamax(board_array, self._depth, current_player_index)
+        # x, y = self.launch_threads(current_player_index)
+        available_actions = self.get_available_actions()
+        if len(available_actions) == 0:
+            center = self._board._size//2
+            return center, center
+        _, x, y = negamax(board, board._board, self._depth, players, current_player_index, available_actions=available_actions)
         if self._debug_mode:
             print("Can't print the time, debug mode is on")
         else:
             print(f"Time to get best move:{time()-current_time:.2f}s")
         return x, y
 
-    def negamax(self, board_array, depth, current_player_index,
-                x_value=-2, y_value=-2, alpha=float('-inf'), beta=float('inf')):
-        # Terminal state
-        if x_value >= 0 and y_value >= 0:
-            opponent_player = self._players[(current_player_index + 1) % 2]
-            game_over, winner = self._board.terminal_state(x_value, y_value, opponent_player, False, board_array)
-            if game_over or depth == 0:
-                score = heuristic_evaluation(self._board, board_array, opponent_player, winner,
-                                            x_value, y_value, self.DRAW, depth)*opponent_player.stone_color
-                return score, None, None
+    def get_available_actions(self):
+        used_actions = self._board.get_used_actions(self._board._board)
+        if not used_actions:
+            return []
 
-        available_actions = self.get_best_available_actions(board_array, x_value, y_value)
-        max_eval = float('-inf')
-        best_move = (0, 0)
+        available_actions = []
+        directions = ["Horizontal", "Vertical", "Normal_Diag", "Reversed_Diag"]
+        x0, y0 = self._board.last_play
+        available_actions_last_play = []
+        for x, y in used_actions:
+            adjucents = self._board.get_Adjucents(x, y, 2)
+            for key in range(len(adjucents[directions[0]])):
+                for direction in directions:
+                    x1 = adjucents[direction][key][0]
+                    y1 = adjucents[direction][key][1]
+                    if x1 is not None and y1 is not None:
+                        if self._board._board[y1][x1] == self.ZERO:
+                            if (x1, y1) not in available_actions:
+                                if x1 == x0 and y1 == y0:
+                                    # available_actions_last_play.insert(0, (x1, y1))
+                                    available_actions.insert(0, (x1, y1))
+                                else:
+                                    available_actions.append((x1, y1))
 
-        for x, y in available_actions:
-            board_array_copy = board_array.copy()
-            player1_capture = self._players[0].peer_captured
-            player2_capture = self._players[1].peer_captured
-            played, board_array_copy, captured_stones_pos = self._board.place_stone(x, y, self._players, current_player_index, board_array_copy)
-            if played and board_array_copy[y][x] != self._players[0].ZERO:
-                eval = self.negamax(board_array_copy, depth-1, (current_player_index + 1) % 2, x, y, -beta, -alpha)[0]
-                self._players[0].peer_captured = player1_capture
-                self._players[1].peer_captured = player2_capture
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = (x, y)
-                # Alpha-beta pruning
-                alpha = max(alpha, eval)
-                if alpha >= beta:
-                    break
+        # start = 0
+        # actions_per_thread = len(available_actions) // self._thread_num
+        # for x, y in available_actions_last_play:
+        #     available_actions.remove((x, y))
+        #     available_actions.insert(start, (x, y))
+        #     start = start + actions_per_thread
+        #     if start >= len(available_actions):
+        #         start = 0
 
-        return -max_eval, best_move[0], best_move[1]
+        return available_actions
+
+    def launch_threads(self, current_player_index):
+        queue_list = Queue()
+        threads = []
+
+        available_actions = self.get_available_actions()
+        if len(available_actions) == 0:
+            center = self._board._size//2
+            return center, center
+
+        actions_per_thread = len(available_actions) // self._thread_num
+        remainder = len(available_actions) % self._thread_num
+
+        start = 0
+        for i in range(self._thread_num):
+            if start <= len(available_actions)-1:
+                end = start + actions_per_thread + (1 if i < remainder else 0)
+                kwargs = {
+                    "board":self._board,
+                    "board_array":self._board._board.copy(),
+                    "depth" : self._depth,
+                    "players" : [player.clone() for player in self._players],
+                    "current_player_index":current_player_index,
+                    "queue_list":queue_list,
+                    "available_actions":available_actions[start:end]
+                }
+                thread = Thread(target=negamax, kwargs=kwargs)
+                threads.append(thread)
+                thread.start()
+                start = end
+
+        for thread in threads:
+            thread.join()
+
+        best_move = (-1, -1)
+        best_score = float('-inf')
+
+        while not queue_list.empty():
+            eval, x, y = queue_list.get()
+            if eval > best_score:
+                best_score = eval
+                best_move = (x, y)
+
+        if best_score == float('-inf'):
+            from random import randint
+
+            lostanyway = randint(0, len(available_actions)-1)
+            if self._debug_mode:
+                print("AI is lost anyway, random move")
+            return available_actions[lostanyway][0], available_actions[lostanyway][1]
+
+        return best_move
