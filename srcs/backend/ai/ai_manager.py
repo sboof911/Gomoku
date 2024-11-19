@@ -10,10 +10,30 @@ class AI_manager():
     WHITE = -1 * BLACK
     ZERO = 0 * BLACK
 
-    def __init__(self, depth=4, debug_mode=False) -> None:
-        self._depth = depth
+    def __init__(self, difficulty, debug_mode=False) -> None:
+        self._depth = self.get_depth(difficulty)
         self._debug_mode = debug_mode
         self._thread_num = cpu_count()
+        
+    def get_depth(self, difficulty):
+        if difficulty == 1:
+            return 3
+        elif difficulty == 2:
+            return 7
+        else:
+            return 11
+        # depths = {
+        #     "early": 3,
+        #     "mid": 4,
+        #     "late": 5
+        # }
+
+        # if self._board._turns < 3:
+        #     return depths["early"]
+        # elif self._board._turns < 11:
+        #     return depths["mid"]
+        # else:
+        #     return depths["late"]
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
@@ -25,7 +45,7 @@ class AI_manager():
         if len(available_actions) == 0:
             center = self._board._size//2
             return center, center
-        _, x, y = negamax(board, board._board, self.get_depth(), players, current_player_index, available_actions=available_actions)
+        _, x, y = negamax(board, board._board, self._depth, players, current_player_index, available_actions=available_actions)
         if self._debug_mode:
             print("Can't print the time, debug mode is on")
         else:
@@ -67,21 +87,6 @@ class AI_manager():
 
         return available_actions
 
-    def get_depth(self):
-        return self._depth
-        depths = {
-            "early": 3,
-            "mid": 4,
-            "late": 5
-        }
-
-        if self._board._turns < 3:
-            return depths["early"]
-        elif self._board._turns < 11:
-            return depths["mid"]
-        else:
-            return depths["late"]
-
     def launch_threads(self, current_player_index):
         queue_list = Queue()
         threads = []
@@ -101,7 +106,7 @@ class AI_manager():
                 kwargs = {
                     "board":self._board,
                     "board_array":self._board._board.copy(),
-                    "depth" : self.get_depth(),
+                    "depth" : self._depth,
                     "players" : [player.clone() for player in self._players],
                     "current_player_index":current_player_index,
                     "queue_list":queue_list,
