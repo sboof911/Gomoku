@@ -8,23 +8,21 @@ MARGE_ERROR_THRESHOLD = render.MARGE_ERROR_THRESHOLD
 player1_text_x, player1_text_y = 10.0, 90.0
 player2_text_x, player2_text_y = 487.0, 90.0
 
-def create_text_players(current_render : render, player1_name, player2_name):
+def create_text_players(current_render : render, game_manager : game_manager_module):
     current_render.canvas.create_text(
         player1_text_x,
         player1_text_y,
         anchor="nw",
-        text=player1_name,
+        text=game_manager._players[0].name,
         fill="#1E1E1E",
         font=("Jaini Regular", 30 * -1)
     )
-
-    
 
     current_render.canvas.create_text(
         player2_text_x,
         player2_text_y,
         anchor="nw",
-        text=player2_name,
+        text=game_manager._players[1].name,
         fill="#FCF5F5",
         font=("Jaini Regular", 30 * -1)
     )
@@ -241,25 +239,11 @@ def back_button(current_render : render):
     button_2.bind('<Leave>', button_2_leave)
 
 def render_Game_page(current_render : render, AI=False):
-    if AI:
-        import random
-        rnd_int = random.randint(0, 1)
-        player1_name = "AI" if rnd_int == 1 else current_render._settings.player1
-        player2_name = "AI" if rnd_int == 0 else current_render._settings.player1
-    else:
-        player1_name = current_render._settings.player1
-        player2_name = current_render._settings.player2
-
-    game_manager = game_manager_module(current_render._settings.rule)
-    game_manager.add_player(player1_name, player2_name)
-    for player in game_manager._players:
-        if player.name == "AI":
-            player.set_mode(player.AI_MODE)
-
+    game_manager = game_manager_module(current_render._settings, AI)
     current_render.clear_window()
     current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
     current_render.set_backgroud()
-    create_text_players(current_render, player1_name, player2_name)
+    create_text_players(current_render, game_manager)
     board_game(current_render, game_manager, AI)
     back_button(current_render)

@@ -1,16 +1,23 @@
 from srcs.backend.game.board import board
 from srcs.backend.game.player import player
+from srcs.backend.settings.settings import settings
 
 class game_manager:
-    def __init__(self, rule, board_size=19, connect_num=5) -> None:
-        self._board = board(board_size, connect_num, rule)
+    def __init__(self, settings : settings, AI_mode, board_size=19, connect_num=5) -> None:
+        self._board = board(board_size, connect_num, settings.rule)
         self._players = []
         self._current_player_index = 0
         self._is_game_over = False
+        self.set_players(AI_mode, settings)
 
-    def add_player(self, player1, player2):
-        self._players.append(player(player1, player.BLACK))
-        self._players.append(player(player2, player.WHITE))
+    def set_players(self, AI_mode, settings : settings):
+        import random
+        player1 = settings.player1
+        player2 = settings.player2 if not AI_mode else settings.AIName
+        player2_mode = player.AI_MODE if AI_mode else player.PLAYER_MODE
+        idx = random.randint(0, 1)
+        self._players.insert(idx, player(player1, player.BLACK, settings.debug_mode, settings.difficulty_level, player.PLAYER_MODE))
+        self._players.insert((idx+1)%2, player(player2, player.WHITE, settings.debug_mode, settings.difficulty_level, player2_mode))
 
     def switch_turns(self):
         self._current_player_index = (self._current_player_index + 1) % len(self._players)

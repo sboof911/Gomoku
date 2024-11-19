@@ -8,14 +8,14 @@ class player:
     AI_MODE = "AI"
     PLAYER_MODE = "Player"
 
-    def __init__(self, name, stone_color, debug_mode=False, copy_mode=False, peer_captured=0, mode=PLAYER_MODE) -> None:
+    def __init__(self, name, stone_color, debug_mode=False, difficulty_level=None, mode=None, copy_mode=False, peer_captured=0) -> None:
         self.name = name
         self.stone_color = stone_color
         self.peer_captured = peer_captured
         self._debug_mode = debug_mode
         self._max_peer_capture = 5
         if not copy_mode:
-            self.Ai = AI_manager(debug_mode=debug_mode)
+            self.Ai = AI_manager(difficulty_level, debug_mode=debug_mode)
         self.mode = mode
 
     def set_mode(self , mode : str):
@@ -29,4 +29,4 @@ class player:
 
     def clone(self):
         return player(self.name, self.stone_color, self._debug_mode,
-                      copy_mode=True, peer_captured=self.peer_captured, mode=self.mode)
+                      copy_mode=True, peer_captured=self.peer_captured)
