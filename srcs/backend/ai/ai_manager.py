@@ -34,8 +34,8 @@ class AI_manager():
             center = self._board._size//2
             return center, center
 
-        _, x, y = minimax(board, board._board, self._depth, players, current_player_index,
-                          self._board.last_play[0], self._board.last_play[1], used_actions=board._used_actions)
+        _, x, y = minimax(board, board._board, self._depth, players,
+                          current_player_index, used_actions=board._used_actions)
 
         if self._debug_mode:
             print("Can't print the time, debug mode is on")

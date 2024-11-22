@@ -1,6 +1,6 @@
 from srcs.backend.ai.heuristic_evaluation import heuristic_evaluation, check_index, MAX_SCORE
 
-def get_best_available_actions(board_array, used_actions, ZERO, x1=-2, y1=-2):
+def get_best_available_actions(board_array, used_actions, ZERO):
     available_actions = []
     directions = [(1, 1), (0, 1), (1, 0), (1, -1),
                   (0, -1), (-1, -1), (-1, 0), (-1, 1)]
@@ -19,8 +19,8 @@ def get_best_available_actions(board_array, used_actions, ZERO, x1=-2, y1=-2):
     return available_actions
 
 def minimax(board, board_array, depth, players, ai_player_index,
-            x_value=-2, y_value=-2, maximizing_player=True,
-            alpha=float('-inf'), beta=float('inf'), used_actions={}):
+            maximizing_player=True, alpha=float('-inf'),
+            beta=float('inf'), used_actions={}):
 
     score = heuristic_evaluation(board_array, used_actions, players, ai_player_index, board._connect_num)
 
@@ -29,8 +29,7 @@ def minimax(board, board_array, depth, players, ai_player_index,
             return 0, None, None
         return score, None, None
 
-    available_actions = get_best_available_actions(
-        board_array, used_actions, players[0].ZERO, x_value, y_value)
+    available_actions = get_best_available_actions(board_array, used_actions, players[0].ZERO)
 
     opponent_player_index = (ai_player_index + 1) % 2
     max_eval = float('-inf')
@@ -50,7 +49,7 @@ def minimax(board, board_array, depth, players, ai_player_index,
             used_actions.add((x, y))
             eval, _, _ = minimax(
                 board, board_array, depth-1, players,
-                ai_player_index, x, y, not maximizing_player,
+                ai_player_index, not maximizing_player,
                 alpha, beta, used_actions)
 
             for x0, y0 in captured_stones_pos[0]:
