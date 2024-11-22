@@ -11,10 +11,10 @@ def get_best_available_actions(board_array, used_actions, ZERO, x1=-2, y1=-2):
             if check_index(board_array.shape[0], x0, y0):
                 if board_array[y0][x0] == ZERO:
                     if (x0, y0) not in available_actions:
-                        if x == x1 and y == y1:
-                            available_actions.insert(0, (x0, y0))
-                        else:
-                            available_actions.append((x0, y0))
+                        available_actions.append((x0, y0))
+
+    center = board_array.shape[0] // 2
+    available_actions.sort(key=lambda pos: abs(pos[0] - center) + abs(pos[1] - center))
 
     return available_actions
 
