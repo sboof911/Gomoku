@@ -3,8 +3,8 @@ from srcs.backend.game.rules_manager import SUPPORTED_RULES
 class settings:
     def __init__(self) -> None:
         self._rule = SUPPORTED_RULES[0]
-        self._player1 = "Player_1"
-        self._player2 = "Player_2"
+        self._player1 = "Sboof"
+        self._player2 = "Hmida"
         self._AIName = "AI"
         self._debug_mode = False
         self._difficulty_level = 1
