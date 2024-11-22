@@ -32,8 +32,6 @@ def minimax(board, board_array, depth, players, ai_player_index,
 
     score = heuristic_evaluation(board_array, players, ai_player_index, board._connect_num)
 
-    # if board._turns == 5 and x_value == 9 and y_value == 4:
-        # print(f"[({x_value}, {y_value}) ---> {score} - {maximizing_player}]")
     if abs(score) >= MAX_SCORE or depth == 0:
         if score == players[0].DRAW:
             return 0, None, None
@@ -49,18 +47,26 @@ def minimax(board, board_array, depth, players, ai_player_index,
     best_move = (-1, -1)
 
     for x, y in available_actions:
-        board_array_copy = board_array.copy()
-        players_copy = [player.clone() for player in players]
+        player1_peer_capture = players[0].peer_captured
+        player2_peer_capture = players[1].peer_captured
         if maximizing_player:
-            played, board_array_copy = board.place_stone(
-                x, y, players_copy, ai_player_index, board_array_copy)
+            played, board_array, captured_stones_pos = board.place_stone(
+                x, y, players, ai_player_index, board_array)
         else:
-            played, board_array_copy = board.place_stone(
-                x, y, players_copy, opponent_player_index, board_array_copy)
+            played, board_array, captured_stones_pos = board.place_stone(
+                x, y, players, opponent_player_index, board_array)
         if played:
             eval, _, _ = minimax(
-                board, board_array_copy, depth-1, players_copy,
+                board, board_array, depth-1, players,
                 ai_player_index, x, y, not maximizing_player, alpha, beta)
+
+            for x0, y0 in captured_stones_pos[0]:
+                board_array[y0][x0] = players[0].BLACK
+            for x0, y0 in captured_stones_pos[1]:
+                board_array[y0][x0] = players[0].WHITE
+            board_array[y][x] = players[0].ZERO
+            players[0].peer_captured = player1_peer_capture
+            players[1].peer_captured = player2_peer_capture
 
         if maximizing_player:
             if eval > max_eval:

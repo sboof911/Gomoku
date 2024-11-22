@@ -26,7 +26,7 @@ class game_manager:
 
     def play_turn(self, x, y):
         current_player : player = self._players[self._current_player_index]
-        played, self._board._board = self._board.place_stone(x, y, self._players, self._current_player_index, debug=True)
+        played, self._board._board, _ = self._board.place_stone(x, y, self._players, self._current_player_index, debug=True)
         if played:
             self._board.set_used_actions()
             self._board.last_play = x, y
