@@ -77,4 +77,5 @@ def heuristic_evaluation(board_array, players, current_player_index, connect_num
 
     if full:
         return player.DRAW
-    return player_score - enemy_player_score
+    total_score = player_score - enemy_player_score
+    return MAX_SCORE * (total_score/abs(total_score))-1 if abs(total_score) > MAX_SCORE else total_score

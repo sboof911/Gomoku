@@ -3,7 +3,7 @@ from srcs.backend.game.player import player
 from srcs.backend.settings.settings import settings
 
 class game_manager:
-    def __init__(self, settings : settings, AI_mode, board_size=3, connect_num=3) -> None:
+    def __init__(self, settings : settings, AI_mode, board_size=19, connect_num=5) -> None:
         self._board = board(board_size, connect_num, settings.rule)
         self._players = []
         self._current_player_index = 0

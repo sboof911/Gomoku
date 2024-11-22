@@ -16,25 +16,12 @@ class AI_manager():
         self._thread_num = cpu_count()
 
     def get_depth(self):
-        return 9
         if self._difficulty == 1:
             return 3
         elif self._difficulty == 2:
             return 7
         else:
             return 11
-        # depths = {
-        #     "early": 3,
-        #     "mid": 4,
-        #     "late": 5
-        # }
-
-        if self._board._turns < 3:
-            return depths["early"]
-        elif self._board._turns < 11:
-            return depths["mid"]
-        else:
-            return depths["late"]
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
