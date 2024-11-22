@@ -12,28 +12,9 @@ class board:
         self._rules = rules(self, rule)
         self._used_actions = set()
         self._turns = 1
-        self._last_play = None
 
     def next_turn(self):
         self._turns += 1
-
-    @property
-    def last_play(self):
-        return self._last_play
-
-    @last_play.setter
-    def last_play(self, value):
-        if not isinstance(value, tuple):
-            raise ValueError(f"Invalid value, expected: tuple got: {type(value)}")
-        x, y = value
-        if isinstance(x, int) and isinstance(y, int):
-            if 0 <= x < self._size and 0 <= y < self._size:
-                self._last_play = (x, y)
-            else:
-                raise ValueError(f"Invalid value, expected: (0 <= x < {self._size}, 0 <= y < {self._size}) got: ({x}, {y})")
-        else:
-            raise ValueError(f"Invalid value, expected: (int, int) got: ({type(x)}, {type(y)})")
-        
 
     def get_used_actions(self, board_array):
         used_actions = set()
