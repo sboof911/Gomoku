@@ -49,7 +49,7 @@ def evaluate_pos(board_array, player, x_value, y_value, connect_num):
 
     return score
 
-def heuristic_evaluation(board_array, players, current_player_index, connect_num):
+def heuristic_evaluation(board_array, used_actions, players, current_player_index, connect_num):
     player = players[current_player_index]
     enemy_player = players[(current_player_index+1)%2]
     if player.peer_captured == player._max_peer_capture:
@@ -59,23 +59,21 @@ def heuristic_evaluation(board_array, players, current_player_index, connect_num
     player_score = player.peer_captured * 10
     enemy_player_score = enemy_player.peer_captured * 10
 
-    full = True
-    for x in range(board_array.shape[1]):
-        for y in range(board_array.shape[0]):
-            if board_array[y][x] == player.stone_color:
-                score = evaluate_pos(board_array, player, x, y, connect_num)
-                if score == MAX_SCORE:
-                    return score
-                player_score += score
-            elif board_array[y][x] == enemy_player.stone_color:
-                score = evaluate_pos(board_array, enemy_player, x, y, connect_num)
-                if score == MAX_SCORE:
-                    return -score
-                enemy_player_score += score
-            elif full:
-                full = False
-
-    if full:
+    if len(used_actions) == board_array.size:
         return player.DRAW
+
+    for x, y in used_actions:
+        if board_array[y][x] == player.stone_color:
+            score = evaluate_pos(board_array, player, x, y, connect_num)
+            if score == MAX_SCORE:
+                return score
+            player_score += score
+        elif board_array[y][x] == enemy_player.stone_color:
+            score = evaluate_pos(board_array, enemy_player, x, y, connect_num)
+            if score == MAX_SCORE:
+                return -score
+            enemy_player_score += score
+
+
     total_score = player_score - enemy_player_score
     return MAX_SCORE * (total_score/abs(total_score))-1 if abs(total_score) > MAX_SCORE else total_score

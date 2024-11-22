@@ -22,7 +22,7 @@ def minimax(board, board_array, depth, players, ai_player_index,
             x_value=-2, y_value=-2, maximizing_player=True,
             alpha=float('-inf'), beta=float('inf'), used_actions={}):
 
-    score = heuristic_evaluation(board_array, players, ai_player_index, board._connect_num)
+    score = heuristic_evaluation(board_array, used_actions, players, ai_player_index, board._connect_num)
 
     if abs(score) >= MAX_SCORE or depth == 0:
         if score == players[0].DRAW:
