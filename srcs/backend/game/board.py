@@ -122,9 +122,9 @@ class board:
             board_array, captured_stones_pos = self.check_capture(adjucents, board_array)
             players[0].peer_captured += len(captured_stones_pos[1])//2
             players[1].peer_captured += len(captured_stones_pos[0])//2
-            return True, board_array
+            return True, board_array, captured_stones_pos
 
-        return False, board_array
+        return False, board_array, {}
 
     def check_direction(self, stone_color, board_array, adjucents, direction, connect_num=None):
         connect_num = self._connect_num if connect_num is None else connect_num
