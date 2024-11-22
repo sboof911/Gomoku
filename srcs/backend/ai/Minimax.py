@@ -47,6 +47,10 @@ def minimax(board, board_array, depth, players, ai_player_index,
                 x, y, players, opponent_player_index, board_array)
         if played:
             used_actions.add((x, y))
+            for x0, y0 in captured_stones_pos[0]:
+                used_actions.remove((x0, y0))
+            for x0, y0 in captured_stones_pos[1]:
+                used_actions.remove((x0, y0))
             eval, _, _ = minimax(
                 board, board_array, depth-1, players,
                 ai_player_index, not maximizing_player,
