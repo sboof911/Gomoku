@@ -8,6 +8,7 @@ class settings:
         self._AIName = "AI"
         self._debug_mode = False
         self._difficulty_level = 1
+        self._backgroud_img = 0
 
     @property
     def rule(self):
