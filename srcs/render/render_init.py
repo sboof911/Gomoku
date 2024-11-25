@@ -1,79 +1,76 @@
 import tkinter as tk
 import os
 from srcs.backend.settings.settings import settings
-INIT_WIDTH = 600
-INIT_HEIGHT = 500
+INIT_WIDTH = 1000
+INIT_HEIGHT = 700
+IMAGE_DATA = {'x': 500.0, 'y': 350.0}
 
-class ResizingCanvas(tk.Canvas):
-    def __init__(self,parent,**kwargs):
-        self.save = []
-        tk.Canvas.__init__(self,parent,**kwargs)
-        self.bind("<Configure>", self.on_resize)
-        self.height = self.winfo_reqheight()
-        self.width = self.winfo_reqwidth()
+class save:
+    def __init__(self):
+        self.imgs = []
+        self.player1_captured = None
+        self.player2_captured = None
+        self.player1_time = None
+        self.player2_time = None
+        self.turn = None
+        self.on_buttons = {"black":None, "white":None}
+        self.off_buttons = {"black":None, "white":None}
+        self.best_move_text = {"0":None, "1":None}
 
-    def on_resize(self,event):
-        # determine the ratio of old width/height to new width/height
-        wscale = float(event.width)/self.width
-        hscale = float(event.height)/self.height
-        self.width = event.width
-        self.height = event.height
-        # resize the canvas 
-        self.config(width=self.width, height=self.height)
-        # rescale all the objects tagged with the "all" tag
-        self.scale("all",0,0,wscale,hscale)
+    def clear(self):
+        self.imgs = []
+        self.player1_captured = None
+        self.player2_captured = None
+        self.player1_time = None
+        self.player2_time = None
+        self.turn = None
+        self.on_buttons = {"black":None, "white":None}
+        self.off_buttons = {"black":None, "white":None}
+        self.best_move_text = {"0":None, "1":None}
 
-class render:
-    TABLE_MARGE = 14
+class render(save):
+    TABLE_MARGE = 22
     MARGE_ERROR_THRESHOLD = 5
     def __init__(self):
         self._window = tk.Tk()
         self._window.title("Gomoku")
-        self._window.geometry(f"{INIT_WIDTH}x{INIT_HEIGHT}")
-        self._window.resizable(True, True)
+        self._window.geometry(f"{INIT_WIDTH}x{INIT_HEIGHT}+0+0")
+        self._window.resizable(False, False)
         self._canvas : tk.Canvas = None
         self._settings = settings()
+        super().__init__()
 
     def get_image(self, page_name, image_name):
         current_folder = os.path.dirname(os.path.abspath(__file__))
-        return f"{current_folder}/srcs/{page_name}/{image_name}_0.png" # TODO : change the 0 to the current settings
-
-    def get_window_size(self):
-        width = self._window.winfo_width() if self._window.winfo_width() > 1 else INIT_WIDTH
-        height = self._window.winfo_height() if self._window.winfo_height() > 1 else INIT_HEIGHT
-
-        return width, height
+        return f"{current_folder}/srcs/{page_name}/{image_name}_{self._settings._backgroud_img}.png"
 
     def clear_window(self):
-        self.save = []
+        self.clear()
         for widget in self._window.winfo_children():
             widget.pack_forget()
 
     def set_canvas(self, frame = None):
         window = self._window if frame is None else frame
-        width, height = self.get_window_size() if frame is None else (window.winfo_width(), window.winfo_height())
-        canvas = ResizingCanvas(
+        canvas = tk.Canvas(
             window,
             bg = "#FFFFFF",
-            height = height,
-            width = width,
+            height = INIT_HEIGHT,
+            width = INIT_WIDTH,
             bd = 0,
             highlightthickness = 0,
         )
-        if frame is None:
-            self._canvas = canvas
-            self._canvas.pack(fill=tk.BOTH, expand=tk.YES)
-        else:
-            return canvas
+        self._canvas = canvas
+        self._canvas.pack()
 
     def set_backgroud(self):
-        self._backgroud_img = tk.PhotoImage(
+        backgroud_img = tk.PhotoImage(
             file=self.get_image("backgrouds", "backgroud")) # need to get the backgroud from the settings
         self._canvas.create_image(
-            300.0,
-            250.0,
-            image=self._backgroud_img
+            IMAGE_DATA['x'],
+            IMAGE_DATA['y'],
+            image=backgroud_img
         )
+        self.imgs.append(backgroud_img)
 
     @property
     def window(self):

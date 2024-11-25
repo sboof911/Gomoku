@@ -17,6 +17,7 @@ class player:
         if not copy_mode:
             self.Ai = AI_manager(difficulty_level, debug_mode=debug_mode)
         self.mode = mode
+        self.best_move_on = False
 
     def set_mode(self , mode : str):
         if mode in [self.AI_MODE, self.PLAYER_MODE]:

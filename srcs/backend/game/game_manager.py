@@ -15,9 +15,25 @@ class game_manager:
         player1 = settings.player1
         player2 = settings.player2 if not AI_mode else settings.AIName
         player2_mode = player.AI_MODE if AI_mode else player.PLAYER_MODE
+        playersdata = {
+            0:{
+                "name": player1,
+                "mode": player.PLAYER_MODE
+            },
+            1:{
+                "name": player2,
+                "mode": player2_mode
+            }
+        }
         idx = random.randint(0, 1)
-        self._players.insert(idx, player(player1, player.BLACK, settings.debug_mode, settings.difficulty_level, player.PLAYER_MODE))
-        self._players.insert((idx+1)%2, player(player2, player.WHITE, settings.debug_mode, settings.difficulty_level, player2_mode))
+        self._players.append(player(playersdata[idx]["name"],
+                                    player.BLACK, settings.debug_mode,
+                                    settings.difficulty_level,
+                                    playersdata[idx]["mode"]))
+        self._players.append(player(playersdata[(idx+1)%2]["name"],
+                                    player.WHITE, settings.debug_mode,
+                                    settings.difficulty_level,
+                                    playersdata[(idx+1)%2]["mode"]))
 
     def switch_turns(self):
         self._current_player_index = (self._current_player_index + 1) % len(self._players)
@@ -37,6 +53,20 @@ class game_manager:
             return True
 
         return False
+    
+    def best_move(self):
+        return self.player.best_move(self._board, self._players, self._current_player_index)
+
+    def set_player_best_move(self, best_move_on, idx):
+        if idx != 0 and idx != 1:
+            raise ValueError("Invalid player index")
+        if not isinstance(best_move_on, bool):
+            raise ValueError("Invalid best_move_on value")
+        self._players[idx].best_move_on = best_move_on
+
+    @property
+    def current_player_index(self):
+        return self._current_player_index
 
     @property
     def player(self) -> player:
@@ -57,3 +87,27 @@ class game_manager:
     @property
     def winner_color(self):
         return self._board._board_winner_color
+
+    @property
+    def size(self):
+        return self._board._size
+
+    @property
+    def player1_name(self):
+        return self._players[0].name
+
+    @property
+    def player2_name(self):
+        return self._players[1].name
+
+    @property
+    def player1_captured(self):
+        return self._players[0].peer_captured
+
+    @property
+    def player2_captured(self):
+        return self._players[1].peer_captured
+    
+    @property
+    def turn(self):
+        return self._board._turns

@@ -3,14 +3,20 @@ from srcs.render.render_init import render
 from srcs.render.game_page import render_Game_page
 
 
+GAME_TITLE = {'x': 100.0, 'y': 30.0, 'font': ("JollyLodger", 85, "bold italic")}
+SETTINGS_BUTTON = {'x': 884.0, 'y': 589.0, 'width': 80.0, 'height': 80.0}
+PLAYER_AI_BUTTON = {'x': 182.0, 'y': 388.0, 'width': 641.0, 'height': 118.0}
+PLAYER_PLAYER_BUTTON = {'x': 182.0, 'y': 232.0, 'width': 641.0, 'height': 118.0}
+
+
 def game_Title(current_render : render):
     current_render.canvas.create_text(
-        125.0,
-        38.0,
+        GAME_TITLE['x'],
+        GAME_TITLE['y'],
         anchor="nw",
-        text="Gomoku",
-        fill="#2E00FF",
-        font=("Segoe Script", 70 * -1)
+        text="Gomoku Game",
+        fill="#0083FF",
+        font=GAME_TITLE['font']
     )
 
 def setting_button(current_render : render):
@@ -25,10 +31,10 @@ def setting_button(current_render : render):
         relief="flat"
     )
     button_1.place(
-        x=525.0,
-        y=412.0,
-        width=48.0,
-        height=48.0
+        x=SETTINGS_BUTTON['x'],
+        y=SETTINGS_BUTTON['y'],
+        width=SETTINGS_BUTTON['width'],
+        height=SETTINGS_BUTTON['height']
     )
 
     button_image_hover_1 = PhotoImage(
@@ -58,10 +64,10 @@ def player_AI_button(current_render : render):
         relief="flat"
     )
     button_2.place(
-        x=105.0,
-        y=279.0,
-        width=390.0,
-        height=86.0
+        x=PLAYER_AI_BUTTON['x'],
+        y=PLAYER_AI_BUTTON['y'],
+        width=PLAYER_AI_BUTTON['width'],
+        height=PLAYER_AI_BUTTON['height']
     )
 
     button_image_hover_2 = PhotoImage(
@@ -91,10 +97,10 @@ def player_player_button(current_render : render):
         relief="flat"
     )
     button_3.place(
-        x=104.0,
-        y=164.0,
-        width=390.0,
-        height=86.0
+        x=PLAYER_PLAYER_BUTTON['x'],
+        y=PLAYER_PLAYER_BUTTON['y'],
+        width=PLAYER_PLAYER_BUTTON['width'],
+        height=PLAYER_PLAYER_BUTTON['height']
     )
 
     button_image_hover_3 = PhotoImage(
