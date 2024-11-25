@@ -1,7 +1,8 @@
-from tkinter import Button, PhotoImage, Frame, Canvas
+from tkinter import Button, PhotoImage
 from srcs.render.render_init import render
 from srcs.backend.game.game_manager import game_manager as game_manager_module
-from srcs.render.board_render import board_game
+from srcs.render.game_page_srcs.board_render import board_game
+from srcs.render.game_page_srcs.best_move import create_best_move
 
 PLAYER1_TEXT = {'x': 12.0, 'y': 97.0, 'font': ("Jaini Regular", 40, "bold italic")}
 PLAYER2_TEXT = {'x': 802.0, 'y': 97.0, 'font': ("Jaini Regular", 40, "bold italic")}
@@ -122,5 +123,7 @@ def render_Game_page(current_render : render, AI=False):
     create_text_players(current_render, game_manager)
     create_stone_text(current_render, game_manager)
     create_time_text(current_render)
+    if not AI:
+        create_best_move(current_render, game_manager)
     board_game(current_render, game_manager, AI)
     back_button(current_render)

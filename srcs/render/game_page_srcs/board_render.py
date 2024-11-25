@@ -1,6 +1,6 @@
 from tkinter import Canvas, PhotoImage, Frame
 from srcs.backend.game.game_manager import game_manager as game_manager_module
-from srcs.render.drawing import draw_board, draw_indexs, draw_winning_line
+from srcs.render.game_page_srcs.drawing import draw_board, draw_indexs, draw_winning_line
 from srcs.render.render_init import render
 import time
 
@@ -55,7 +55,7 @@ def update_time_text(current_render : render, time_to_play, idx):
         text=str_time if idx == 1 else "00:00"
     )
 
-def create_base_board(current_render : render, board_game_img):
+def create_base_board(current_render : render, board_game_img, size):
     frame = Frame(current_render.window, borderwidth=0, highlightthickness=0, relief="flat")
     frame.pack()
     frame.place(**BOARD_FRAME)
@@ -69,9 +69,9 @@ def create_base_board(current_render : render, board_game_img):
 
     current_render.imgs.append(board_game_img)
     frame.update_idletasks()
-    cell_width = (canvas.winfo_width() - (2*TABLE_MARGE)) / (19+1)
-    cell_height = (canvas.winfo_height() - (2*TABLE_MARGE)) / (19+1)
-    draw_indexs(canvas, cell_width, cell_height, TABLE_MARGE)
+    cell_width = (canvas.winfo_width() - (2*TABLE_MARGE)) / (size+1)
+    cell_height = (canvas.winfo_height() - (2*TABLE_MARGE)) / (size+1)
+    draw_indexs(canvas, cell_width, cell_height, TABLE_MARGE, size)
 
     return frame, canvas
 
@@ -114,6 +114,21 @@ def check_winner(game_manager : game_manager_module, canvas : Canvas, cell_width
     else:
         print(f"Player {game_manager.player.name} wins with {game_manager.player.peer_captured} captured peer!")
 
+def update_best_move(current_render : render, game_manager : game_manager_module, game_canvas):
+    if game_manager.player.best_move_on:
+        current_index = str(game_manager.current_player_index)
+        next_index = str((game_manager.current_player_index+1)%2)
+        x, y = game_manager.best_move()
+        x_var = chr(ord('A') + x)
+        y_var = game_manager.size - y
+        current_render.canvas.itemconfig(
+            current_render.best_move_text[current_index],
+            text=f"{x_var}:{y_var}")
+        current_render.canvas.itemconfig(
+            current_render.best_move_text[next_index],
+            text=f"X:X")
+        game_canvas.update()
+
 
 def launch_game(game_manager : game_manager_module, game_canvas : Canvas,
                 current_render : render, board_img, cell_width,
@@ -134,6 +149,7 @@ def launch_game(game_manager : game_manager_module, game_canvas : Canvas,
             idx = (idx + 1) % 2
             time_before_play = crr_time
             game_canvas.update()
+            update_best_move(current_render, game_manager, game_canvas)
         if game_manager.is_game_over:
             check_winner(game_manager, game_canvas, cell_width, cell_height)
         elif Ai_mode:
@@ -164,6 +180,6 @@ def launch_game(game_manager : game_manager_module, game_canvas : Canvas,
 
 def board_game(current_render : render, game_manager : game_manager_module, Ai_mode):
     board_game_img = PhotoImage(file=current_render.get_image("game_page", "board_game"))
-    frame, canvas = create_base_board(current_render, board_game_img)
+    frame, canvas = create_base_board(current_render, board_game_img, game_manager.size)
     cell_width, cell_height, game_canvas = create_game(frame, canvas, board_game_img, game_manager)
     launch_game(game_manager, game_canvas, current_render, board_game_img, cell_width, cell_height, Ai_mode)

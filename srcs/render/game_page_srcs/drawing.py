@@ -49,14 +49,14 @@ def draw_board(canvas : Canvas, game_manager : game_manager_module,
             if game_manager.board[y][x] != game_manager.player.ZERO:
                 draw_player(game_manager, canvas, x, y, cell_width, cell_height)
 
-def draw_indexs(canvas : Canvas, cell_width, cell_height, TABLE_MARGE):
-    letters = [chr(ord('A') + i) for i in range(19)]
+def draw_indexs(canvas : Canvas, cell_width, cell_height, TABLE_MARGE, size):
+    letters = [chr(ord('A') + i) for i in range(size)]
     for i, letter in enumerate(letters):
         x = TABLE_MARGE + cell_width * (i + 1)
         y = canvas.winfo_height() - cell_height / 2
         canvas.create_text(x, y, text=letter, fill="#FFFFFF")
 
-    for i in range(19):
+    for i in range(size):
         x = cell_width / 2
         y = TABLE_MARGE + cell_height * (i + 1)
-        canvas.create_text(x, y, text=str(19 - i), fill="#FFFFFF")
+        canvas.create_text(x, y, text=str(size - i), fill="#FFFFFF")

@@ -57,6 +57,17 @@ class game_manager:
     def best_move(self):
         return self.player.best_move(self._board, self._players, self._current_player_index)
 
+    def set_player_best_move(self, best_move_on, idx):
+        if idx != 0 and idx != 1:
+            raise ValueError("Invalid player index")
+        if not isinstance(best_move_on, bool):
+            raise ValueError("Invalid best_move_on value")
+        self._players[idx].best_move_on = best_move_on
+
+    @property
+    def current_player_index(self):
+        return self._current_player_index
+
     @property
     def player(self) -> player:
         return self._players[self._current_player_index]

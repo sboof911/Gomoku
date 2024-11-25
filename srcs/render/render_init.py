@@ -13,7 +13,10 @@ class save:
         self.player1_time = None
         self.player2_time = None
         self.turn = None
-        
+        self.on_buttons = {"black":None, "white":None}
+        self.off_buttons = {"black":None, "white":None}
+        self.best_move_text = {"0":None, "1":None}
+
     def clear(self):
         self.imgs = []
         self.player1_captured = None
@@ -21,6 +24,9 @@ class save:
         self.player1_time = None
         self.player2_time = None
         self.turn = None
+        self.on_buttons = {"black":None, "white":None}
+        self.off_buttons = {"black":None, "white":None}
+        self.best_move_text = {"0":None, "1":None}
 
 class render(save):
     TABLE_MARGE = 22
