@@ -115,7 +115,6 @@ def back_button(current_render : render):
 
 def render_Game_page(current_render : render, AI=False):
     game_manager = game_manager_module(current_render._settings, AI)
-    print(game_manager.player.Ai._difficulty)
     current_render.clear_window()
     current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
