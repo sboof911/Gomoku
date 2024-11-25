@@ -53,7 +53,7 @@ class game_manager:
             return True
 
         return False
-    
+
     def best_move(self):
         return self.player.best_move(self._board, self._players, self._current_player_index)
 

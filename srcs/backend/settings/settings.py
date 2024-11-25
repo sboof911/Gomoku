@@ -26,11 +26,11 @@ class settings:
 
     def can_set_name(self, name : str):
         if not isinstance(name, str):
-            raise ValueError(f"{name} must be a string")
+            raise ValueError("name must be a string")
         if len(name) > 8 or 1 > len(name):
-            raise ValueError(f"{name} must be less than 8 characters")
+            raise ValueError("name must be less than 8 characters")
         if not name.isalnum():
-            raise ValueError(f"{name} must be alphanumeric")
+            raise ValueError("name must be alphanumeric")
 
     @AIName.setter
     def AIName(self, AIName : str):

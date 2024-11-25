@@ -16,6 +16,7 @@ class save:
         self.on_buttons = {"black":None, "white":None}
         self.off_buttons = {"black":None, "white":None}
         self.best_move_text = {"0":None, "1":None}
+        self.error_entries = {"Player1":None, "Player2":None, "AI_Player":None}
 
     def clear(self):
         self.imgs = []
@@ -27,6 +28,7 @@ class save:
         self.on_buttons = {"black":None, "white":None}
         self.off_buttons = {"black":None, "white":None}
         self.best_move_text = {"0":None, "1":None}
+        self.error_entries = {"Player1":None, "Player2":None, "AI_Player":None}
 
 class render(save):
     TABLE_MARGE = 22
@@ -64,7 +66,7 @@ class render(save):
 
     def set_backgroud(self):
         backgroud_img = tk.PhotoImage(
-            file=self.get_image("backgrouds", "backgroud")) # need to get the backgroud from the settings
+            file=self.get_image("commun", "backgroud"))
         self._canvas.create_image(
             IMAGE_DATA['x'],
             IMAGE_DATA['y'],
@@ -83,3 +85,34 @@ class render(save):
 
         return self._canvas
 
+    @property
+    def difficulty_level(self):
+        return self._settings.difficulty_level
+
+    @difficulty_level.setter
+    def difficulty_level(self, value):
+        self._settings.difficulty_level = value
+
+    @property
+    def player1_name(self):
+        return self._settings.player1
+
+    @player1_name.setter
+    def player1_name(self, value):
+        self._settings.player1 = value
+
+    @property
+    def player2_name(self):
+        return self._settings.player2
+
+    @player2_name.setter
+    def player2_name(self, value):
+        self._settings.player2 = value
+
+    @property
+    def ai_player_name(self):
+        return self._settings.AIName
+
+    @ai_player_name.setter
+    def ai_player_name(self, value):
+        self._settings.AIName = value

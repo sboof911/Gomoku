@@ -83,7 +83,7 @@ def create_turns_text(current_render : render, game_manager : game_manager_modul
 def back_button(current_render : render):
     from srcs.render.main_page import render_main_page
     button_image_2 = PhotoImage(
-        file=current_render.get_image("game_page", "back"))
+        file=current_render.get_image("commun", "back"))
     button_2 = Button(
         image=button_image_2,
         borderwidth=0,
@@ -99,7 +99,7 @@ def back_button(current_render : render):
     )
 
     button_image_hover_2 = PhotoImage(
-        file=current_render.get_image("game_page", "hover_back"))
+        file=current_render.get_image("commun", "hover_back"))
 
     def button_2_hover(e):
         button_2.config(
@@ -115,6 +115,7 @@ def back_button(current_render : render):
 
 def render_Game_page(current_render : render, AI=False):
     game_manager = game_manager_module(current_render._settings, AI)
+    print(game_manager.player.Ai._difficulty)
     current_render.clear_window()
     current_render.set_canvas()
     current_render.canvas.place(x = 0, y = 0)
