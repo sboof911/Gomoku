@@ -89,6 +89,10 @@ class game_manager:
         return self._board._board_winner_color
 
     @property
+    def winner_name(self):
+        return self.player.name
+
+    @property
     def size(self):
         return self._board._size
 

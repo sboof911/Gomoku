@@ -91,3 +91,15 @@ def get_best_moves():
         return jsonify({"x": best_move[0], "y": best_move[1]})
     except Exception as e:
         return jsonify({"message": str(e)}), 400
+
+@app.route('/api/game/winner', methods=['GET'])
+@cross_origin()
+def get_winner_color():
+    global game_manager_module
+    try:
+        if game_manager_module.is_game_over:
+            return jsonify({"message": game_manager_module.winner_name})
+        else:
+            return jsonify({"message": None})
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

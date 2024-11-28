@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Board from '../components/Board';
 import PlayerInfo from '../components/PlayerInfo';
+import WinnerModal from '../components/WinnerModal';
 import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import config from '../Config';
@@ -22,69 +23,75 @@ export default function PlayerVsPlayer() {
   const [showHints2, setShowHints2] = useState(false);
   const [bestMoveX, setBestMoveX] = useState<number | null>(null);
   const [bestMoveY, setBestMoveY] = useState<number | null>(null);
-  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+  const [lastMoveTime, setLastMoveTime] = useState<number>(Date.now());
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+
+
+  const initializeGame = async () => {
+    try {
+      const response = await axios.post(`${config.serverUrl}/api/game/init`,
+                              { isAI: false },
+                              { headers: config.headers_data });
+      console.log('Game initialized:', response.data.message);
+    } catch (error) {
+      console.error('Error initializing game:', error);
+    }
+
+    await get_board();
+    await set_CurrentPlayer();
+    await set_Turns();
+    await set_Peer_Captured();
+    await get_Players_Name();
+  };
 
   useEffect(() => {
-    const initializeGame = async () => {
-      try {
-        const response = await axios.post(`${config.serverUrl}/api/game/init`,
-                                { isAI: false },
-                                { headers: config.headers_data });
-        console.log('Game initialized:', response.data.message);
-      } catch (error) {
-        console.error('Error initializing game:', error);
-      }
-
-      await get_board();
-      await set_CurrentPlayer();
-      await set_Turns();
-      await set_Peer_Captured();
-      await get_Players_Name();
-    };
-
     initializeGame();
   }, []);
 
+
   useEffect(() => {
-    let startTime = Date.now();
+    if (winner) {
+      setShowWinnerModal(true);
+    }
+  }, [winner]);
+
+
+  useEffect(() => {
     const timer = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      if (currentPlayer === 1) {
-        setPlayer1Time(prev => prev + elapsed);
-      } else {
-        setPlayer2Time(prev => prev + elapsed);
+      if (!winner) {
+        const now = Date.now();
+        const elapsed = (now - lastMoveTime) / 1000;
+        if (currentPlayer === 1) {
+          setPlayer1Time(elapsed);
+        } else {
+          setPlayer2Time(elapsed);
+        }
       }
-      startTime = Date.now();
     }, 100);
 
     return () => clearInterval(timer);
-  }, [currentPlayer]);
+  }, [currentPlayer, winner, lastMoveTime]);
 
 
   useEffect(() => {
-    if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
-      // console.log('Is AI thinking...:', isAiThinking);
-      findBestMove();
+    if (!winner) {
+      if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
+        findBestMove();
+      }
     }
   }, [showHints1, showHints2, currentPlayer]);
 
-  // useEffect(() => {
-  //   if (isAiThinking) {
-  //     findBestMove();
-  //   }
-  // }, [isAiThinking]);
 
   const findBestMove = async () => {
+    if (winner) return null;
     if (bestMoveX === null || bestMoveY === null) {
         if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
           try {
-            console.log('Fetching best move...', currentPlayer);
-            // console.log('Is AI thinking:', isAiThinking);
             const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
             setBestMoveX(response.data.x);
             setBestMoveY(response.data.y);
-            console.log('Best move response:', response.data.x, response.data.y);
-            console.log('Best move:', bestMoveX, bestMoveY);
+            console.log('Best move:', response.data.x, response.data.y);
           } catch (error) {
             console.error('Error fetching best move:', error);
           }
@@ -100,19 +107,25 @@ export default function PlayerVsPlayer() {
   };
 
   const handleCellClick = (row: number, col: number) => {
+    if (winner) return;
     axios.post(`${config.serverUrl}/api/game/move`, { x: col, y: row }, { headers: config.headers_data })
-    .then(response => {
+    .then(async response => {
       if (response.data.played) {
         get_board();
-        set_CurrentPlayer();
-        set_Turns();
-        set_Peer_Captured();
-        setBestMoveX(null);
-        setBestMoveY(null);
-        setPlayer1Time(0);
-        setPlayer2Time(0);
-      }
-      else {
+        if (await checkWinner() === false) {
+          set_CurrentPlayer();
+          set_Turns();
+          set_Peer_Captured();
+          setBestMoveX(null);
+          setBestMoveY(null);
+          if (currentPlayer === 1) {
+              setPlayer1Time(0);
+            } else {
+              setPlayer2Time(0);
+            }
+            setLastMoveTime(Date.now());
+          }
+      } else {
         toast.error('Invalid move');
       }
     })
@@ -120,6 +133,19 @@ export default function PlayerVsPlayer() {
       toast.error('Error making move:', error.response.data.message);
     });
   };
+
+  const checkWinner = async () => {
+    try {
+      const response = await axios.get(`${config.serverUrl}/api/game/winner`, {headers : config.headers_data});
+      if (response.data.message !== null) {
+        setWinner(response.data.message);
+        return true;
+      }
+    } catch (error) {
+      console.error('Error fetching winner:', error);
+    }
+    return false;
+  }
 
   const get_Players_Name = async () => {
     try {
@@ -168,6 +194,15 @@ export default function PlayerVsPlayer() {
     }
   }
 
+  const handleNewGame = async () => {
+      initializeGame()
+      setPlayer1Time(0);
+      setPlayer2Time(0);
+      setWinner(null);
+      setLastMoveTime(Date.now());
+      setShowWinnerModal(false);
+  };
+
   const handleBackToMenu = async () => {
     try {
       await axios.post(`${config.serverUrl}/api/game/delete`, {}, { headers: config.headers_data });
@@ -188,7 +223,7 @@ export default function PlayerVsPlayer() {
         Back to Menu
       </button>
 
-      <div className="flex items-center justify-center gap-8 max-w-7xl mx-auto">
+      <div className={`flex items-center justify-center gap-8 max-w-7xl mx-auto ${showWinnerModal ? 'blur-sm' : ''}`}>
         <PlayerInfo
           name={player1Name}
           captured={captured1}
@@ -218,6 +253,15 @@ export default function PlayerVsPlayer() {
           onToggleHints={() => setShowHints2(prev => !prev)}
         />
       </div>
+
+      {showWinnerModal && winner && (
+        <WinnerModal
+          winner={winner}
+          onNewGame={handleNewGame}
+          onMainMenu={() => navigate('/')}
+          onClose={() => setShowWinnerModal(false)}
+        />
+      )}
     </div>
   );
 }
