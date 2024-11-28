@@ -113,7 +113,13 @@ class game_manager:
     @property
     def player2_captured(self):
         return self._players[1].peer_captured
-    
+
     @property
     def turn(self):
         return self._board._turns
+
+    @property
+    def AI_Player(self):
+        for key, player in enumerate(self._players):
+            if player.mode == player.AI_MODE:
+                return key

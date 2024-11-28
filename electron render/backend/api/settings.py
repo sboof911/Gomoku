@@ -1,10 +1,8 @@
 from flask import request, jsonify
-from flask_cors import cross_origin
 from server import app, settings_module
 
 
 @app.route('/api/settings/difficulty/<difficulty>', methods=['POST'])
-@cross_origin()
 def set_difficulty(difficulty):
     try:
         setattr(settings_module, "difficulty_level", difficulty)
@@ -13,7 +11,6 @@ def set_difficulty(difficulty):
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/settings/<player>', methods=['POST'])
-@cross_origin()
 def set_player(player):
     players = ["player1", "player2", "AIName"]
     if player in players:
@@ -28,7 +25,6 @@ def set_player(player):
 
 
 @app.route('/api/settings/<setting>', methods=['GET'])
-@cross_origin()
 def get_setting(setting):
     settings = ["player1", "player2", "AIName", "difficulty", "rules"]
     if setting in settings:

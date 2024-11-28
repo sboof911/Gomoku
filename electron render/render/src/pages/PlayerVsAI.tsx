@@ -19,6 +19,7 @@ export default function PlayerVsAI() {
       .map(() => Array(19).fill(0))
   );
   const [currentPlayer, setCurrentPlayer] = useState<1 | 2>(1);
+  const [AIPlayerIndex, setAIPlayerIndex] = useState(0);
   const [turns, setTurns] = useState(1);
   const [playerTime, setPlayerTime] = useState(0);
   const [aiTime, setAiTime] = useState(0);
@@ -41,6 +42,18 @@ export default function PlayerVsAI() {
       console.error('Error fetching players name:', error);
     }
   };
+
+  const get_AiPlayer_index = async () => {
+    try {
+      const response = await axios.get(
+        `${config.serverUrl}/api/game/ai_player`,
+        { headers: config.headers_data }
+      );
+      setAIPlayerIndex(response.data.message+1)
+    } catch (error) {
+      console.error('Error fetching ai index:', error);
+    }
+  }
 
   const set_Captured = async () => {
     try {
@@ -123,6 +136,7 @@ export default function PlayerVsAI() {
     await set_Turns();
     await set_Captured();
     await get_Players_Name();
+    await get_AiPlayer_index()
   };
 
   useEffect(() => {
@@ -199,17 +213,17 @@ export default function PlayerVsAI() {
         toast.error('Error making move');
       }
     }
-  }; // Added missing closing brace here
+  };
 
   useEffect(() => {
-    if (currentPlayer === 2 && !winner) {
+    if (currentPlayer === AIPlayerIndex && !winner) {
       const timeout = setTimeout(makeAiMove, 1000);
       return () => clearTimeout(timeout);
     }
-  }, [currentPlayer, winner]);
+  }, [currentPlayer, winner, AIPlayerIndex]);
 
   const handleCellClick = (row: number, col: number) => {
-    if (currentPlayer !== 1 || board[row][col] !== 0 || winner) return;
+    if (currentPlayer === AIPlayerIndex || winner) return;
 
     axios
       .post(
@@ -323,4 +337,4 @@ export default function PlayerVsAI() {
       )}
     </div>
   );
-} // Removed extra closing brace here
+}

@@ -3,6 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from flask import Flask
+from flask_cors import CORS
 from srcs.settings.settings import settings
 from srcs.game.game_manager import game_manager
 import logging
@@ -12,6 +13,7 @@ settings_module = settings()
 game_manager_module : game_manager = None
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['DEBUG'] = True
 

@@ -1,9 +1,7 @@
 from flask import request, jsonify
-from flask_cors import cross_origin
 from server import app, game_manager_module, game_manager, settings_module
 
 @app.route('/api/game/init', methods=['POST'])
-@cross_origin()
 def initilize_game():
     global game_manager_module
     try:
@@ -14,7 +12,6 @@ def initilize_game():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/delete', methods=['POST'])
-@cross_origin()
 def delete_game():
     global game_manager_module
     try:
@@ -24,7 +21,6 @@ def delete_game():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/move', methods=['POST'])
-@cross_origin()
 def move():
     global game_manager_module
     try:
@@ -35,7 +31,6 @@ def move():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/board', methods=['GET'])
-@cross_origin()
 def get_board():
     global game_manager_module
     try:
@@ -44,7 +39,6 @@ def get_board():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/turns', methods=['GET'])
-@cross_origin()
 def get_turn():
     global game_manager_module
     try:
@@ -53,7 +47,6 @@ def get_turn():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/currentPlayer', methods=['GET'])
-@cross_origin()
 def get_current_player():
     global game_manager_module
     try:
@@ -62,7 +55,6 @@ def get_current_player():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/captured', methods=['GET'])
-@cross_origin()
 def get_peercaptured():
     global game_manager_module
     try:
@@ -73,7 +65,6 @@ def get_peercaptured():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/players_name', methods=['GET'])
-@cross_origin()
 def get_names():
     global game_manager_module
     try:
@@ -82,7 +73,6 @@ def get_names():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/best_move', methods=['GET'])
-@cross_origin()
 def get_best_moves():
     global game_manager_module
 
@@ -93,7 +83,6 @@ def get_best_moves():
         return jsonify({"message": str(e)}), 400
 
 @app.route('/api/game/winner', methods=['GET'])
-@cross_origin()
 def get_winner_color():
     global game_manager_module
     try:
@@ -107,5 +96,13 @@ def get_winner_color():
             return jsonify({"message": kwargs})
         else:
             return jsonify({"message": None})
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+    
+@app.route('/api/game/ai_player', methods=['GET'])
+def get_ai_index_player():
+    global game_manager_module
+    try:
+        return jsonify({"message": game_manager_module.AI_Player})
     except Exception as e:
         return jsonify({"message": str(e)}), 400
