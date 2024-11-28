@@ -1,5 +1,5 @@
 from time import time
-from srcs.ai.Minimax import minimax, MAX_SCORE
+from srcs.ai.Minimax import minimax, MAX_SCORE, get_best_available_actions
 from threading import Thread
 from queue import Queue
 from os import cpu_count
@@ -37,13 +37,16 @@ class AI_manager():
 
         if not self._ai_isThinking:
             self._ai_isThinking = True
-            _, x, y = minimax(board, board._board, self._depth, players,
-                            current_player_index, used_actions=board._used_actions)
+            players_clone = [player.clone() for player in players]
+            _, x, y = minimax(board, board._board.copy(), self._depth,
+                              players_clone, current_player_index,
+                              used_actions=board._used_actions.copy())
+            if x is None or y is None:
+                x, y = get_best_available_actions(board._board, board._used_actions, self.ZERO)[0]
             self._ai_isThinking = False
         else:
             raise Exception("AI is already thinking")
 
-        print(f"x:{x}, y:{y}")
         if self._debug_mode:
             print("Can't print the time, debug mode is on")
         else:
