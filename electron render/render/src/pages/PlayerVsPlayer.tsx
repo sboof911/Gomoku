@@ -60,30 +60,43 @@ export default function PlayerVsPlayer() {
     return () => clearInterval(timer);
   }, [currentPlayer]);
 
+  useEffect(() => {
+    if ((showHints1 || showHints2) && !isAiThinking) {
+      findBestMove();
+    }
+  }, [showHints1, showHints2]);
+
   const findBestMove = async () => {
     if (bestMoveX === null || bestMoveY === null) {
-      try {
-        console.log('Fetching best move...', currentPlayer);
-        const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
-        setBestMoveX(response.data.x);
-        setBestMoveY(response.data.y);
-        setIsAiThinking(false);
-      } catch (error) {
-        console.error('Error fetching best move:', error);
+      if (isAiThinking === false) {
+        if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
+          try {
+              console.log('Fetching best move...', currentPlayer);
+              console.log('Is AI thinking:', isAiThinking);
+              setIsAiThinking(true)
+              console.log('Is AI thinking:', isAiThinking);
+              const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
+              setBestMoveX(response.data.x);
+              setBestMoveY(response.data.y);
+              setIsAiThinking(false);
+            } catch (error) {
+              console.error('Error fetching best move:', error);
+            }
+          }
+        }
       }
-    }
   }
 
   const getHintPosition = (): [number, number] | null => {
     if (bestMoveX !== null && bestMoveY !== null) {
       return [bestMoveY, bestMoveX];
     }
-    if (isAiThinking === false) {
-      if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
-        setIsAiThinking(true);
-        findBestMove();
-      }
-    }
+    // if (isAiThinking === false) {
+    //   if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
+    //     setIsAiThinking(true);
+    //     findBestMove();
+    //   }
+    // }
     return null;
   };
 
