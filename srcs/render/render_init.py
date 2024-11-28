@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import font
 import os
 from srcs.backend.settings.settings import settings
 INIT_WIDTH = 1000
@@ -40,7 +41,16 @@ class render(save):
         self._window.resizable(False, False)
         self._canvas : tk.Canvas = None
         self._settings = settings()
+        self.set_fonts()
         super().__init__()
+
+    def set_fonts(self):
+        current_folder = os.path.dirname(os.path.abspath(__file__))
+        font_folder = f"{current_folder}/srcs/fonts"
+        files = os.listdir(font_folder)
+        for file in files:
+            if file.endswith(".ttf"):
+                pass
 
     def get_image(self, page_name, image_name):
         current_folder = os.path.dirname(os.path.abspath(__file__))

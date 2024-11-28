@@ -2,7 +2,7 @@ from tkinter import Button, PhotoImage, Entry
 from srcs.render.render_init import render
 from srcs.render.game_page import back_button
 
-FONT = ("Jaini Regular", 30 * -1)
+FONT = ("Jaini-Regular", 30 * -1)
 DIFFICULTY_TEXT = {"x":113.0, "y":422.0, "font":FONT}
 NAMES_FIELD = {
     "Player1": {
@@ -185,7 +185,5 @@ def render_Settings_page(current_render : render):
     current_render.canvas.place(x = 0, y = 0)
     current_render.set_backgroud()
     create_Players(current_render)
-    # create_Player2(current_render)
-    # create_Player_AI(current_render)
     create_Difficulty(current_render)
     back_button(current_render)

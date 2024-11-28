@@ -1,7 +1,3 @@
-__pycache__
-*env*
-*test*
-
 # Logs
 logs
 *.log
