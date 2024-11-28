@@ -7,7 +7,7 @@ from server import app, settings_module
 @cross_origin()
 def set_difficulty(difficulty):
     try:
-        setattr(settings_module, difficulty, difficulty)
+        setattr(settings_module, "difficulty_level", difficulty)
         return jsonify({"message": "success"})
     except Exception as e:
         return jsonify({"message": str(e)}), 400

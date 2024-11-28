@@ -7,7 +7,7 @@ class settings:
         self._player2 = "Hmida"
         self._AIName = "AI"
         self._debug_mode = False
-        self._difficulty_level = 0
+        self._difficulty_level = 1
         self._backgroud_img = 0
 
     @property
@@ -69,17 +69,22 @@ class settings:
     @property
     def difficulty(self):
         difficulties = ["easy", "medium", "hard"]
-        return difficulties[self._difficulty_level]
+        return difficulties[self._difficulty_level-1]
 
-    @difficulty.setter
+    @property
+    def difficulty_level(self) -> int:
+        return self._difficulty_level
+
+    @difficulty_level.setter
     def difficulty_level(self, difficulty : str):
         difficulties = ["easy", "medium", "hard"]
         difficulty_level = 0
         for k, d in enumerate(difficulties):
             if d == difficulty:
-                difficulty_level = k
+                difficulty_level = k+1
                 break
         if difficulty_level > 0:
             self._difficulty_level = difficulty_level
-        raise ValueError("difficulty must be one of [easy, medium, hard]")
+        else:
+            raise ValueError("difficulty must be one of [easy, medium, hard]")
 

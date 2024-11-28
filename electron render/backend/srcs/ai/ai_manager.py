@@ -17,25 +17,24 @@ class AI_manager():
         self._thread_num = cpu_count()
 
     def get_depth(self):
-        if self._difficulty == 0:
+        if self._difficulty == 1:
             return 3
-        elif self._difficulty == 1:
+        elif self._difficulty == 2:
             return 7
-        else:
+        elif self._difficulty == 3:
             return 11
+        raise Exception("Difficulty level not supported")
 
     def get_best_move(self, board, players, current_player_index):
         self._board = board
         self._depth = self.get_depth()
         self._players = players
         current_time = time()
-
         # x, y = self.launch_threads(current_player_index)
         if len(board._used_actions) == 0:
             center = self._board._size//2
             return center, center
 
-        print(f"current_player_index : {current_player_index}")
         if not self._ai_isThinking:
             self._ai_isThinking = True
             _, x, y = minimax(board, board._board, self._depth, players,

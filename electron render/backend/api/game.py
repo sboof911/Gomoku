@@ -85,6 +85,7 @@ def get_names():
 @cross_origin()
 def get_best_moves():
     global game_manager_module
+
     try:
         best_move = game_manager_module.best_move()
         return jsonify({"x": best_move[0], "y": best_move[1]})

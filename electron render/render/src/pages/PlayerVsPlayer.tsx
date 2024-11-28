@@ -62,36 +62,33 @@ export default function PlayerVsPlayer() {
 
 
   useEffect(() => {
-    console.log("in useEffect");
-    if (!isAiThinking) {
-      if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
-        console.log('Is AI thinking...:', isAiThinking);
-        setIsAiThinking(true)
-      }
+    if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
+      // console.log('Is AI thinking...:', isAiThinking);
+      findBestMove();
     }
   }, [showHints1, showHints2, currentPlayer]);
 
-  useEffect(() => {
-    if (isAiThinking) {
-      findBestMove();
-    }
-  }, [isAiThinking]);
+  // useEffect(() => {
+  //   if (isAiThinking) {
+  //     findBestMove();
+  //   }
+  // }, [isAiThinking]);
 
   const findBestMove = async () => {
     if (bestMoveX === null || bestMoveY === null) {
         if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
           try {
             console.log('Fetching best move...', currentPlayer);
-            console.log('Is AI thinking:', isAiThinking);
+            // console.log('Is AI thinking:', isAiThinking);
             const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
             setBestMoveX(response.data.x);
             setBestMoveY(response.data.y);
+            console.log('Best move response:', response.data.x, response.data.y);
+            console.log('Best move:', bestMoveX, bestMoveY);
           } catch (error) {
             console.error('Error fetching best move:', error);
-          } finally {
-            setIsAiThinking(false);
           }
-          }
+        }
       }
   }
 
