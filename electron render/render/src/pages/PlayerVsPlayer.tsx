@@ -60,30 +60,38 @@ export default function PlayerVsPlayer() {
     return () => clearInterval(timer);
   }, [currentPlayer]);
 
+
   useEffect(() => {
-    if ((showHints1 || showHints2) && !isAiThinking) {
+    console.log("in useEffect");
+    if (!isAiThinking) {
+      if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
+        console.log('Is AI thinking...:', isAiThinking);
+        setIsAiThinking(true)
+      }
+    }
+  }, [showHints1, showHints2, currentPlayer]);
+
+  useEffect(() => {
+    if (isAiThinking) {
       findBestMove();
     }
-  }, [showHints1, showHints2]);
+  }, [isAiThinking]);
 
   const findBestMove = async () => {
     if (bestMoveX === null || bestMoveY === null) {
-      if (isAiThinking === false) {
         if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
           try {
-              console.log('Fetching best move...', currentPlayer);
-              console.log('Is AI thinking:', isAiThinking);
-              setIsAiThinking(true)
-              console.log('Is AI thinking:', isAiThinking);
-              const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
-              setBestMoveX(response.data.x);
-              setBestMoveY(response.data.y);
-              setIsAiThinking(false);
-            } catch (error) {
-              console.error('Error fetching best move:', error);
-            }
+            console.log('Fetching best move...', currentPlayer);
+            console.log('Is AI thinking:', isAiThinking);
+            const response = await axios.get(`${config.serverUrl}/api/game/best_move`, { headers: config.headers_data });
+            setBestMoveX(response.data.x);
+            setBestMoveY(response.data.y);
+          } catch (error) {
+            console.error('Error fetching best move:', error);
+          } finally {
+            setIsAiThinking(false);
           }
-        }
+          }
       }
   }
 
@@ -91,12 +99,6 @@ export default function PlayerVsPlayer() {
     if (bestMoveX !== null && bestMoveY !== null) {
       return [bestMoveY, bestMoveX];
     }
-    // if (isAiThinking === false) {
-    //   if ((currentPlayer === 1 && showHints1) || (currentPlayer === 2 && showHints2)) {
-    //     setIsAiThinking(true);
-    //     findBestMove();
-    //   }
-    // }
     return null;
   };
 
