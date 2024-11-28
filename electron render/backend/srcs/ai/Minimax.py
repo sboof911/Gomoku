@@ -50,8 +50,13 @@ def simulate_move(board, board_array, x, y, players, ai_player_index, maximizing
 
 def minimax(board, board_array, depth, players, ai_player_index,
             maximizing_player=True, alpha=float('-inf'),
-            beta=float('inf'), used_actions={}):
+            beta=float('inf'), used_actions={}, memo={}):
     score = heuristic_evaluation(board_array, used_actions, players, ai_player_index, board._connect_num)
+
+    state_key = (tuple(map(tuple, board_array)), depth, maximizing_player, alpha, beta)
+
+    if state_key in memo:
+        return memo[state_key]
 
     if abs(score) >= MAX_SCORE or depth == 0:
         if score == players[0].DRAW:
@@ -71,7 +76,7 @@ def minimax(board, board_array, depth, players, ai_player_index,
             eval, _, _ = minimax(
                 board, board_array, depth - 1, players,
                 ai_player_index, not maximizing_player,
-                alpha, beta, used_actions)
+                alpha, beta, used_actions, memo)
 
             undo_move(board_array, x, y, players, captured_stones_pos, used_actions, prev_captures)
 
@@ -90,5 +95,10 @@ def minimax(board, board_array, depth, players, ai_player_index,
                 break
 
     if maximizing_player:
-        return max_eval, best_move[0], best_move[1]
-    return min_eval, best_move[0], best_move[1]
+        result = (max_eval, best_move[0], best_move[1])
+    else:
+        result = (min_eval, best_move[0], best_move[1])
+
+    # Store the result in the memo dictionary
+    memo[state_key] = result
+    return result

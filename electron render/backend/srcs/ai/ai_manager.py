@@ -2,7 +2,19 @@ from time import time
 from srcs.ai.Minimax import minimax, MAX_SCORE, get_best_available_actions
 from threading import Thread
 from queue import Queue
-from os import cpu_count
+from os import cpu_count, path
+import pickle
+
+MEMO_FILE = path.join(path.dirname(__file__), 'memo_cache', 'minimax_memo.pkl')
+def load_memo():
+    if path.exists(MEMO_FILE):
+        with open(MEMO_FILE, 'rb') as f:
+            return pickle.load(f)
+    return {}
+
+def save_memo(memo):
+    with open(MEMO_FILE, 'wb') as f:
+        pickle.dump(memo, f)
 
 class AI_manager():
     BLACK = 1
@@ -38,9 +50,12 @@ class AI_manager():
         if not self._ai_isThinking:
             self._ai_isThinking = True
             players_clone = [player.clone() for player in players]
+            memo = load_memo()
             _, x, y = minimax(board, board._board.copy(), self._depth,
                               players_clone, current_player_index,
-                              used_actions=board._used_actions.copy())
+                              used_actions=board._used_actions.copy(),
+                              memo = memo)
+            save_memo(memo)
             if x is None or y is None:
                 x, y = get_best_available_actions(board._board, board._used_actions, self.ZERO)[0]
             self._ai_isThinking = False
