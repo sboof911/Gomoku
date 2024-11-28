@@ -8,14 +8,17 @@ interface PlayerInfoProps {
   isCurrentTurn: boolean;
   showHints: boolean;
   onToggleHints: () => void;
+  hideHints?: boolean;
 }
+
 export default function PlayerInfo({ 
   name, 
   captured, 
   time, 
   isCurrentTurn,
   showHints,
-  onToggleHints 
+  onToggleHints,
+  hideHints = false
 }: PlayerInfoProps) {
   const seconds = Math.floor(time);
   const milliseconds = Math.floor((time % 1) * 100);
@@ -36,7 +39,7 @@ export default function PlayerInfo({
         <div className="text-sm text-gray-600">
           Captured: <span className="font-bold text-indigo-600">{captured}</span>
         </div>
-        {isCurrentTurn && (
+        {isCurrentTurn && !hideHints && (
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={onToggleHints}

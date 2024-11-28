@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 export default function PlayerVsAI() {
   const navigate = useNavigate();
-  const [player1Name, setPlayer1NameState] = useState('');
+  const [playerName, setPlayerNameState] = useState('');
   const [playerAIName, setPlayerAINameState] = useState('');
   const [board, setBoard] = useState<number[][]>(
     Array(19)
@@ -36,7 +36,7 @@ export default function PlayerVsAI() {
         `${config.serverUrl}/api/game/players_name`,
         { headers: config.headers_data }
       );
-      setPlayer1NameState(response.data.message[0]);
+      setPlayerNameState(response.data.message[0]);
       setPlayerAINameState(response.data.message[1]);
     } catch (error) {
       console.error('Error fetching players name:', error);
@@ -295,12 +295,13 @@ export default function PlayerVsAI() {
         }`}
       >
         <PlayerInfo
-          name={player1Name}
+          name={playerName}
           captured={playerCaptured}
           time={playerTime}
           isCurrentTurn={currentPlayer === 1}
           showHints={false}
           onToggleHints={() => {}}
+          hideHints={true}
         />
 
         <div className="flex flex-col items-center">
@@ -324,6 +325,7 @@ export default function PlayerVsAI() {
           isCurrentTurn={currentPlayer === 2}
           showHints={false}
           onToggleHints={() => {}}
+          hideHints={true}
         />
       </div>
 
