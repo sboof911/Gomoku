@@ -41,11 +41,10 @@ class game_manager:
             self._board.next_turn()
 
     def play_turn(self, x, y):
-        current_player : player = self._players[self._current_player_index]
         played, self._board._board, _ = self._board.place_stone(x, y, self._players, self._current_player_index, debug=True)
         if played:
             self._board.set_used_actions()
-            if self._board.terminal_state(x, y, current_player):
+            if self._board.terminal_state(x, y, self._players, self._current_player_index):
                 self._is_game_over = True
                 return True
 
@@ -90,7 +89,10 @@ class game_manager:
 
     @property
     def winner_name(self):
-        return self.player.name
+        if self.winner_color == player.BLACK:
+            return self._players[0].name
+        else:
+            return self._players[1].name
 
     @property
     def size(self):

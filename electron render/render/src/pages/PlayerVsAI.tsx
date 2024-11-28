@@ -4,6 +4,7 @@ import Board from '../components/Board';
 import PlayerInfo from '../components/PlayerInfo';
 import WinnerModal from '../components/WinnerModal';
 import { useGame } from '../context/GameContext';
+import type { WinningLine } from '../types/game';
 import { ArrowLeft } from 'lucide-react';
 
 export default function PlayerVsAI() {
@@ -17,6 +18,7 @@ export default function PlayerVsAI() {
   const [playerCaptured, setPlayerCaptured] = useState(0);
   const [aiCaptured, setAiCaptured] = useState(0);
   const [winner, setWinner] = useState<string | null>(null);
+  const [winningLine, setWinningLine] = useState<WinningLine>(null);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [lastMoveTime, setLastMoveTime] = useState<number>(Date.now());
 
@@ -60,7 +62,8 @@ export default function PlayerVsAI() {
       newBoard[row][col] = 2;
       setBoard(newBoard);
 
-      if (checkWin(newBoard, row, col, 2)) {
+      const winLine = checkWin(newBoard, row, col, 2);
+      if (winLine) {
         setWinner(aiName);
       } else {
         setAiTime(0);
@@ -84,7 +87,6 @@ export default function PlayerVsAI() {
     }
     return false;
   }
-
   const handleCellClick = (row: number, col: number) => {
     if (currentPlayer !== 1 || board[row][col] !== 0 || winner) return;
 
@@ -92,7 +94,8 @@ export default function PlayerVsAI() {
     newBoard[row][col] = 1;
     setBoard(newBoard);
 
-    if (checkWin(newBoard, row, col, 1)) {
+    const winLine = checkWin(newBoard, row, col, 1);
+    if (winLine) {
       setWinner(player1Name);
     } else {
       setPlayerTime(0);
@@ -101,6 +104,7 @@ export default function PlayerVsAI() {
       setTurns(t => t + 1);
     }
   };
+  
 
   const handleNewGame = () => {
     setBoard(Array(19).fill(0).map(() => Array(19).fill(0)));
@@ -111,6 +115,7 @@ export default function PlayerVsAI() {
     setPlayerCaptured(0);
     setAiCaptured(0);
     setWinner(null);
+    setWinningLine(null);
     setShowWinnerModal(false);
     setLastMoveTime(Date.now());
   };
@@ -143,6 +148,7 @@ export default function PlayerVsAI() {
             board={board} 
             onCellClick={handleCellClick}
             hintPosition={null}
+            winningLine={winningLine}
           />
         </div>
 

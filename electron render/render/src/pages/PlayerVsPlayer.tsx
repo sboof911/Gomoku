@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Board from '../components/Board';
 import PlayerInfo from '../components/PlayerInfo';
 import WinnerModal from '../components/WinnerModal';
+import type { WinningLine } from '../types/game';
 import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import config from '../Config';
@@ -24,6 +25,7 @@ export default function PlayerVsPlayer() {
   const [bestMoveX, setBestMoveX] = useState<number | null>(null);
   const [bestMoveY, setBestMoveY] = useState<number | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
+  const [winningLine, setWinningLine] = useState<WinningLine>(null);
   const [lastMoveTime, setLastMoveTime] = useState<number>(Date.now());
   const [showWinnerModal, setShowWinnerModal] = useState(false);
 
@@ -112,18 +114,15 @@ export default function PlayerVsPlayer() {
     .then(async response => {
       if (response.data.played) {
         get_board();
+        set_Peer_Captured();
+        set_Turns();
+        setBestMoveX(null);
+        setBestMoveY(null);
         if (await checkWinner() === false) {
           set_CurrentPlayer();
-          set_Turns();
-          set_Peer_Captured();
-          setBestMoveX(null);
-          setBestMoveY(null);
-          if (currentPlayer === 1) {
-              setPlayer1Time(0);
-            } else {
-              setPlayer2Time(0);
-            }
-            setLastMoveTime(Date.now());
+          setPlayer1Time(0);
+          setPlayer2Time(0);
+          setLastMoveTime(Date.now());
           }
       } else {
         toast.error('Invalid move');
@@ -138,7 +137,8 @@ export default function PlayerVsPlayer() {
     try {
       const response = await axios.get(`${config.serverUrl}/api/game/winner`, {headers : config.headers_data});
       if (response.data.message !== null) {
-        setWinner(response.data.message);
+        setWinner(response.data.message.winner_name);
+        setWinningLine(response.data.message.winning_line);
         return true;
       }
     } catch (error) {
@@ -200,6 +200,7 @@ export default function PlayerVsPlayer() {
       setPlayer2Time(0);
       setWinner(null);
       setLastMoveTime(Date.now());
+      setWinningLine(null);
       setShowWinnerModal(false);
   };
 
@@ -241,6 +242,7 @@ export default function PlayerVsPlayer() {
             board={board} 
             onCellClick={handleCellClick} 
             hintPosition={getHintPosition()}
+            winningLine={winningLine}
           />
         </div>
 

@@ -98,7 +98,13 @@ def get_winner_color():
     global game_manager_module
     try:
         if game_manager_module.is_game_over:
-            return jsonify({"message": game_manager_module.winner_name})
+            kwargs = {
+                "winning_line": {"start":[game_manager_module.line_pos_win["y0"], game_manager_module.line_pos_win["x0"]],
+                                 "end":[game_manager_module.line_pos_win["y1"], game_manager_module.line_pos_win["x1"]]
+                                 },
+                "winner_name": game_manager_module.winner_name
+            }
+            return jsonify({"message": kwargs})
         else:
             return jsonify({"message": None})
     except Exception as e:

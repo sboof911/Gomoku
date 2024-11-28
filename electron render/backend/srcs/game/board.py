@@ -8,7 +8,7 @@ class board:
         self._size = board_size
         self._board = np.full((board_size, board_size), player.ZERO, dtype=int)
         self._board_winner_color = None
-        self._line_pos = None
+        self._line_pos = dict(x0=None, y0=None, x1=None, y1=None)
         self._rules = rules(self, rule)
         self._used_actions = set()
         self._turns = 1
@@ -138,7 +138,15 @@ class board:
 
         return False, None
 
-    def terminal_state(self, x, y, player : player, set_winner=True, board_array=None):
+    def terminal_state(self, x, y, players, current_player_index, set_winner=True, board_array=None):
+        player = players[current_player_index]
+        enemy_player = players[(current_player_index+1)%2]
+        if enemy_player.peer_captured >= enemy_player._max_peer_capture:
+            if set_winner:
+                self._board_winner_color = enemy_player.stone_color
+                return True
+            return True, enemy_player.stone_color
+
         if player.peer_captured >= player._max_peer_capture:
             if set_winner:
                 self._board_winner_color = player.stone_color

@@ -1,16 +1,48 @@
 import React from 'react';
+import type { WinningLine } from '../types/game';
 
 interface BoardProps {
   board: number[][];
   onCellClick: (row: number, col: number) => void;
   hintPosition: [number, number] | null;
+  winningLine: WinningLine;
 }
 
-export default function Board({ board, onCellClick, hintPosition }: BoardProps) {
+export default function Board({ board, onCellClick, hintPosition, winningLine }: BoardProps) {
   const CELL_SIZE = 24;
   const GRID_SIZE = 19;
   const DISPLAY_SIZE = 20;
   const BOARD_SIZE = CELL_SIZE * (DISPLAY_SIZE - 1);
+
+  const renderWinningLine = () => {
+    if (!winningLine) return null;
+
+    const { start, end } = winningLine;
+    const startX = start[1] * CELL_SIZE;
+    const startY = start[0] * CELL_SIZE;
+    const endX = end[1] * CELL_SIZE;
+    const endY = end[0] * CELL_SIZE;
+
+    // Calculate line length and angle
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    return (
+      <div
+        className="absolute bg-green-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"
+        style={{
+          width: `${length}px`,
+          height: '4px',
+          left: startX,
+          top: startY,
+          transformOrigin: 'left',
+          transform: `rotate(${angle}deg)`,
+        }}
+      />
+    );
+  };
 
   return (
     <div className="relative bg-amber-100 p-8 rounded-lg shadow-xl">
@@ -44,6 +76,8 @@ export default function Board({ board, onCellClick, hintPosition }: BoardProps) 
             />
           </React.Fragment>
         ))}
+
+        {renderWinningLine()}
 
         {/* Intersection points for gameplay (19x19) */}
         <div className="absolute inset-0 grid"
