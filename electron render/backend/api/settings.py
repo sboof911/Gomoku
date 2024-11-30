@@ -32,7 +32,6 @@ def set_player(player):
 
 @settings_blueprint.route('/api/settings/<setting>', methods=['GET'])
 def get_setting(setting):
-    print(setting)
     global settings_module
     settings = ["player1", "player2", "AIName", "difficulty", "rules"]
     if setting in settings:
