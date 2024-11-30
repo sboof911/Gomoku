@@ -1,7 +1,12 @@
-from flask import request, jsonify
-from server import app, game_manager_module, game_manager, settings_module
+from flask import request, jsonify, Blueprint
+from srcs.game.game_manager import game_manager
+import api.settings as settings
 
-@app.route('/api/game/init', methods=['POST'])
+game_manager_module = None
+settings_module = settings.settings_module
+game_blueprint = Blueprint('game', __name__)
+
+@game_blueprint.route('/api/game/init', methods=['POST'])
 def initilize_game():
     global game_manager_module
     try:
@@ -11,7 +16,7 @@ def initilize_game():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/delete', methods=['POST'])
+@game_blueprint.route('/api/game/delete', methods=['POST'])
 def delete_game():
     global game_manager_module
     try:
@@ -20,7 +25,7 @@ def delete_game():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/move', methods=['POST'])
+@game_blueprint.route('/api/game/move', methods=['POST'])
 def move():
     global game_manager_module
     try:
@@ -30,7 +35,7 @@ def move():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/board', methods=['GET'])
+@game_blueprint.route('/api/game/board', methods=['GET'])
 def get_board():
     global game_manager_module
     try:
@@ -38,7 +43,7 @@ def get_board():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/turns', methods=['GET'])
+@game_blueprint.route('/api/game/turns', methods=['GET'])
 def get_turn():
     global game_manager_module
     try:
@@ -46,7 +51,7 @@ def get_turn():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/currentPlayer', methods=['GET'])
+@game_blueprint.route('/api/game/currentPlayer', methods=['GET'])
 def get_current_player():
     global game_manager_module
     try:
@@ -54,7 +59,7 @@ def get_current_player():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/captured', methods=['GET'])
+@game_blueprint.route('/api/game/captured', methods=['GET'])
 def get_peercaptured():
     global game_manager_module
     try:
@@ -64,7 +69,7 @@ def get_peercaptured():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/players_name', methods=['GET'])
+@game_blueprint.route('/api/game/players_name', methods=['GET'])
 def get_names():
     global game_manager_module
     try:
@@ -72,7 +77,7 @@ def get_names():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/best_move', methods=['GET'])
+@game_blueprint.route('/api/game/best_move', methods=['GET'])
 def get_best_moves():
     global game_manager_module
 
@@ -82,7 +87,7 @@ def get_best_moves():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
-@app.route('/api/game/winner', methods=['GET'])
+@game_blueprint.route('/api/game/winner', methods=['GET'])
 def get_winner_color():
     global game_manager_module
     try:
@@ -99,7 +104,7 @@ def get_winner_color():
     except Exception as e:
         return jsonify({"message": str(e)}), 400
     
-@app.route('/api/game/ai_player', methods=['GET'])
+@game_blueprint.route('/api/game/ai_player', methods=['GET'])
 def get_ai_index_player():
     global game_manager_module
     try:

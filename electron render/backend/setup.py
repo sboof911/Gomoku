@@ -1,9 +1,7 @@
-import pathlib, os, subprocess
-
-# Install dependencies from requirements.txt
-requeriements_path = pathlib.Path(__file__).parent / 'requirements.txt'
-subprocess.check_call(['pip', 'install', '-r', requeriements_path.absolute()])
+import os, subprocess, sys
 from setuptools import setup, find_packages, Command
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 class RunFlaskDevCommand(Command):
     """A custom command to run Flask in development mode."""

@@ -1,16 +1,7 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
-from srcs.settings.settings import settings
-from srcs.game.game_manager import game_manager
-import logging
+import logging, os
 
-
-settings_module = settings()
-game_manager_module : game_manager = None
 
 app = Flask(__name__)
 CORS(app)
@@ -20,8 +11,22 @@ app.config['DEBUG'] = True
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-from api.settings import *
-from api.game import *
+from api.settings import settings_blueprint
+from api.game import game_blueprint
+
+app.register_blueprint(settings_blueprint)
+app.register_blueprint(game_blueprint)
+dist_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'render_dist')
+
+# Route to serve the `index.html`
+@app.route('/')
+def serve_index():
+    return send_from_directory(dist_dir, 'index.html')
+
+# Route to serve other static files (CSS, JS, etc.)
+@app.route('/<path:path>')
+def serve_static_files(path):
+    return send_from_directory(dist_dir, path)
 
 def main():
     app.run(port=5000)
