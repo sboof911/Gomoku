@@ -12,7 +12,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist*
+*dist*
 build*
 *.spec
 *egg-info
@@ -29,3 +29,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.exe
+*.pkl

@@ -5,7 +5,8 @@ PIP = pip
 NPM = npm
 DIST_DIR = ..
 
-# Build statement
+build: build-frontend build-backend
+	@echo Building frontend and backend complited
 
 env:
 	@echo Creating virtual environment
@@ -29,27 +30,40 @@ else
 	cp -rf render/dist backend/render_dist
 endif
 
-build: build-frontend build-backend
-	@echo Building frontend and backend complited
-
-# Start statement
 start: build
 	./Gomoku.exe
-#	$(PYTHON) main.py
-#	$(NPM) start
 
-# Clean statement
 clean:
-	find . -type f -name '*.pyc' -delete
-	find . -type d -name '__pycache__' -exec rm -r {} +
-	rm -rf node_modules
+ifeq ($(OS),Windows_NT)
+	@echo removing Gomoku.exe
+	del /Q /F Gomoku.exe
+	@echo removing backend build
+	del /Q /F backend\Gomoku.spec
+	if exist backend\build rmdir /S /Q backend\build
+	if exist backend\render_dist rmdir /S /Q backend\render_dist
+	for /d /r ./backend %%d in (__pycache__) do @if exist "%%d" rmdir /s /q "%%d"
+	@echo removing frontend build
+	if exist render\dist rmdir /S /Q render\dist
 
-# Full clean statement
+else
+	@echo removing Gomoku.exe
+	rm -f Gomoku.exe
+	@echo removing backend build
+	rm -f backend/Gomoku.spec
+	rm -rf backend/build
+	rm -rf backend/render_dist
+	find backend -type d -name '__pycache__' -exec rm -r {} +
+	@echo removing frontend build
+	rm -rf render/dist
+endif
+
 fclean: clean
-	rm -rf venv
+ifeq ($(OS),Windows_NT)
+	rmdir /S /Q backend\Gomoku-env
+	rmdir /S /Q render\node_modules
+else
+	rm -rf backend/Gomoku-env
+	rm -rf render/node_modules
+endif
 
-# Rebuild statement
 re: fclean build
-
-# Phony targets
-.PHONY: build start clean fclean re
