@@ -11,13 +11,12 @@ build: build-frontend build-backend
 env:
 	@echo Creating virtual environment
 	cd backend && if not exist Gomoku-env ($(PYTHON) -m venv Gomoku-env)
-	backend\Gomoku-env\Scripts\activate
-	python.exe -m pip install --upgrade pip
+	backend\Gomoku-env\Scripts\activate && python.exe -m pip install --upgrade pip
 
 build-backend: env
 	@echo Installing backend dependencies
-	$(PIP) install -r backend/requirements.txt
-	cd backend && $(PYINSTALLER) --onefile --distpath $(DIST_DIR) --name Gomoku --add-data "render_dist:render_dist" --add-data "./server.py:." --add-data "api:api" --add-data "srcs:srcs" --hidden-import=numpy server.py
+	backend\Gomoku-env\Scripts\activate && $(PIP) install -r backend/requirements.txt
+	cd backend && Gomoku-env\Scripts\activate && $(PYINSTALLER) --onefile --distpath $(DIST_DIR) --name Gomoku --add-data "render_dist:render_dist" --add-data "./server.py:." --add-data "api:api" --add-data "srcs:srcs" --hidden-import=numpy server.py
 
 build-frontend:
 	@echo Installing frontend dependencies
