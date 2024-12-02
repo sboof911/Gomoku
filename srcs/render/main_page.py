@@ -1,6 +1,7 @@
 from tkinter import Button, PhotoImage
 from srcs.render.render_init import render
 from srcs.render.game_page import render_Game_page
+from srcs.render.settings_page import render_Settings_page
 
 
 GAME_TITLE = {'x': 100.0, 'y': 30.0, 'font': ("JollyLodger", 85, "bold italic")}
@@ -27,7 +28,7 @@ def setting_button(current_render : render):
         image=button_image_1,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: print("Setting button clicked"),
+        command=lambda: render_Settings_page(current_render),
         relief="flat"
     )
     button_1.place(
