@@ -37,27 +37,27 @@ class board:
         connect_num = self._connect_num if connect_num is None else connect_num
 
         for i in range(-connect_num+1, connect_num):
-            index = y - i
+            index = y + i
             if 0 <= index < self._size:
                 adjucents["Horizontal"].append((x, index))
             else:
                 adjucents["Horizontal"].append((None, None))
 
-            index = x - i
+            index = x + i
             if 0 <= index < self._size:
                 adjucents["Vertical"].append((index, y))
             else:
                 adjucents["Vertical"].append((None, None))
 
-            index_x = x - i
-            index_y = y - i
+            index_x = x + i
+            index_y = y + i
             if 0 <= index_x < self._size and 0 <= index_y < self._size:
                 adjucents["Normal_Diag"].append((index_x, index_y))
             else:
                 adjucents["Normal_Diag"].append((None, None))
 
-            index_x = x + i
-            index_y = y - i
+            index_x = x - i
+            index_y = y + i
             if 0 <= index_x < self._size and 0 <= index_y < self._size:
                 adjucents["Reversed_Diag"].append((index_x, index_y))
             else:
