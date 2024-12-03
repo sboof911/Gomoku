@@ -1,3 +1,4 @@
+import math
 MAX_SCORE = 1000
 
 def check_index(size, x, y):
@@ -76,4 +77,4 @@ def heuristic_evaluation(board_array, used_actions, players, current_player_inde
 
 
     total_score = player_score - enemy_player_score
-    return MAX_SCORE * (total_score/abs(total_score))-1 if abs(total_score) > MAX_SCORE else total_score
+    return (MAX_SCORE * math.copysign(1, total_score))-1 if abs(total_score) > MAX_SCORE else total_score
