@@ -1,4 +1,4 @@
-from srcs.ai.heuristic_evaluation import heuristic_evaluation, check_index, MAX_SCORE
+from srcs.ai.heuristic_evaluation import math, heuristic_evaluation, check_index, MAX_SCORE
 
 def get_best_available_actions(board_array, used_actions, ZERO):
     available_actions = []
@@ -59,6 +59,7 @@ def minimax(board, board_array, depth, players, ai_player_index,
         return memo[state_key]
 
     if abs(score) >= MAX_SCORE or depth == 0:
+        score = score + (int(math.copysign(1, score))*depth)
         if score == players[0].DRAW:
             return 0, None, None
         return score, None, None
